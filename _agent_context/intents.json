@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "flows": [
+    {
+      "path": "/intents/antrag-einreichen",
+      "label": "Antrag einreichen",
+      "description": "Neuen Förderantrag in 4 Schritten einreichen",
+      "file": "src/pages/intents/AntragEinreichenPage.tsx",
+      "summary": "/**\n * Antrag Einreichen — 4-Schritt-Wizard zum Erstellen eines Förderantrags.\n * Steps: 1) Antragsteller → 2) Projektdetails → 3) Finanzierung → 4) Einreichen & Bestätigen.\n * Reads: (keine Vorauswahl nötig). Writes: foerderantraege (createFoerderantraegeEntry).\n * Composes: IntentWizardShell, BudgetTracker.\n */",
+      "components": [
+        "BudgetTracker",
+        "Button",
+        "Input",
+        "IntentWizardShell",
+        "Label",
+        "Select",
+        "SelectContent",
+        "SelectItem",
+        "SelectTrigger",
+        "SelectValue",
+        "Textarea"
+      ],
+      "writes": [
+        "createFoerderantraegeEntry"
+      ]
+    }
+  ],
+  "unregistered_pages": []
+}

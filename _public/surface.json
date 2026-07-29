@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "pages": [
+    {
+      "slug": "foerderantrag",
+      "component": "FoerderantragPage",
+      "title": "Förderantrag einreichen",
+      "endpoints": [
+        {
+          "entity": "foerderantraege",
+          "op": "create",
+          "fields": [
+            "anrede",
+            "antragsteller_vorname",
+            "antragsteller_nachname",
+            "organisation",
+            "rechtsform",
+            "antragsteller_email",
+            "antragsteller_telefon",
+            "antragsteller_website",
+            "strasse",
+            "hausnummer",
+            "plz",
+            "ort",
+            "land",
+            "projekttitel",
+            "projektkurzbeschreibung",
+            "projektbeginn",
+            "projektende",
+            "projektort",
+            "foerderprogramm",
+            "foerderkategorie",
+            "projektziele",
+            "zielgruppe",
+            "massnahmen",
+            "erwartete_ergebnisse",
+            "nachhaltigkeit",
+            "gesamtkosten",
+            "beantragter_foerderbetrag",
+            "eigenanteil",
+            "drittmittel",
+            "finanzierungsplan"
+          ],
+          "preset_fields": { "antragsstatus": "eingegangen" }
+        }
+      ]
+    }
+  ]
+}
