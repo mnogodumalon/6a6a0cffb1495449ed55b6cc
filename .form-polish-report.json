@@ -1,0 +1,16 @@
+{
+  "entities": {
+    "Sachbearbeiter": {
+      "placeholders_set": 6,
+      "defaults_keys": [],
+      "computed_keys": [],
+      "reason": "Reine Stammdaten-Entity (Kontaktdaten). Keine Datumsfelder, keine Preisfelder, keine Berechnungen möglich."
+    },
+    "Förderanträge": {
+      "placeholders_set": 27,
+      "defaults_keys": ["eingangsdatum", "projektbeginn", "projektende", "antragsstatus"],
+      "computed_keys": ["gesamtkosten"],
+      "reason": "Antragsverwaltung mit Projektdatum-Paar und Finanzierungsposten (beantragter_foerderbetrag + eigenanteil + drittmittel = gesamtkosten). Computed dient als Validierungs-Summe."
+    }
+  }
+}
