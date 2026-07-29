@@ -13,6 +13,7 @@ import SachbearbeiterDetailPage from '@/pages/SachbearbeiterDetailPage';
 import FoerderantraegePage from '@/pages/FoerderantraegePage';
 import FoerderantraegeDetailPage from '@/pages/FoerderantraegeDetailPage';
 // <custom:imports>
+const AntragEinreichenPage = lazy(() => import('@/pages/intents/AntragEinreichenPage'));
 // </custom:imports>
 
 // Lazy: public pages live outside <Layout> and only load on /#/public/:slug —
@@ -36,6 +37,7 @@ export default function App() {
                 <Route path="admin" element={<AdminPage />} />
                 <Route path="verwaltung/oeffentliche-seiten" element={<PublicPagesAdmin />} />
                 {/* <custom:routes> */}
+                <Route path="intents/antrag-einreichen" element={<Suspense fallback={null}><AntragEinreichenPage /></Suspense>} />
                 {/* </custom:routes> */}
               </Route>
             </Routes>
