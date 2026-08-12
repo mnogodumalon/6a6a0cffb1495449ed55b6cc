@@ -73,6 +73,10 @@ export interface PublicPagesConfig {
   version: number;
   public_api_base: string;
   pages: Record<string, PublicPageConfig>;
+  /** Pages that exist but are not live (draft or paused). `pages` holds only
+   *  published ones, so this is the sidebar's only way to know whether there
+   *  is anything to publish. Absent in artifacts written before 0.0.281. */
+  unpublished_count?: number;
 }
 
 /**
@@ -113,15 +117,19 @@ export class RateLimitedError extends Error {
   }
 }
 
-/** Server-side field policy rejection (400) with the offending field keys. */
+/** Server-side field policy rejection (400) with the offending field keys.
+ *  `detail` carries the server's problem+json diagnostic verbatim — pages own
+ *  the localized copy, but the diagnostic must stay reachable for debugging. */
 export class FieldValidationError extends Error {
   missingFields: string[];
   unallowedFields: string[];
-  constructor(missingFields: string[], unallowedFields: string[]) {
+  detail?: string;
+  constructor(missingFields: string[], unallowedFields: string[], detail?: string) {
     super('field validation failed');
     this.name = 'FieldValidationError';
     this.missingFields = missingFields;
     this.unallowedFields = unallowedFields;
+    this.detail = detail;
   }
 }
 
@@ -323,6 +331,90 @@ export interface PublicRecordResult {
   updated_at: string | null;
 }
 
+// ---------------------------------------------------------------------------
+// applookup normalization (value-level self-heal)
+// ---------------------------------------------------------------------------
+
+/**
+ * Rewrites applookup reference values to the portable bare suffix
+ * `/apps/{target_app_id}/records/{record_id}` before submitting.
+ *
+ * The anonymous surface rejects references written for the wrong surface (a
+ * hand-built `…/rest/apps/…` URL — the dokument-einreichen incident) with a
+ * 400, and source-level lint rules provably miss glued-together forms.
+ * Normalizing at the VALUE level heals every assembly form identically,
+ * whatever code produced it; the bare suffix is accepted by every service
+ * version. Only fields the page config declares as applookup (with a target
+ * app) are touched, and only values that point into this deployment — a
+ * foreign host is a real error the server must keep diagnosing, not
+ * something to paper over. A healed wrong-surface/wrong-grant form warns and
+ * leaves a Sentry breadcrumb: silent healing would hide that some code still
+ * assembles references the wrong way.
+ */
+function normalizeApplookupRefs(
+  cfg: PublicPagesConfig,
+  page: PublicPageConfig,
+  fields: Record<string, unknown>,
+): Record<string, unknown> {
+  const refFields = new Map<string, string>(); // field key -> target_app_id
+  for (const f of page.fields) {
+    if (f.fulltype.includes('applookup') && f.target_app_id) refFields.set(f.key, f.target_app_id);
+  }
+  for (const ep of page.endpoints ?? []) {
+    if (ep.op !== 'create' || ep.app_id !== page.app_id) continue;
+    for (const f of ep.fields) {
+      if (f.fulltype.includes('applookup') && f.target_app_id) refFields.set(f.key, f.target_app_id);
+    }
+  }
+  if (refFields.size === 0) return fields;
+
+  const toSuffix = (key: string, targetAppId: string, value: unknown): unknown => {
+    if (typeof value !== 'string' || value === '') return value;
+    const marker = `/apps/${targetAppId}/records/`;
+    const idx = value.lastIndexOf(marker);
+    if (idx === -1) return value; // not a URL for the target app — server diagnoses
+    const recordId = value.slice(idx + marker.length);
+    if (!/^[a-f0-9]{24}$/.test(recordId)) return value;
+    const prefix = value.slice(0, idx);
+    if (prefix !== '' && !prefix.startsWith('/')) {
+      try {
+        if (new URL(prefix).origin !== new URL(cfg.public_api_base).origin) return value;
+      } catch {
+        return value;
+      }
+    }
+    const grantInPrefix = /\/grants\/([a-f0-9]{24})$/.exec(prefix);
+    const wrongForm =
+      prefix.endsWith('/rest') || prefix.includes('/rest/') ||
+      (grantInPrefix !== null && grantInPrefix[1] !== page.grant_id);
+    if (wrongForm) {
+      const received = `${prefix}${marker}<record-id>`;
+      try {
+        console.warn(`publicClient: normalized applookup value for '${key}' (received: ${received})`);
+        Sentry.addBreadcrumb({
+          category: 'public-pages',
+          message: `normalized applookup '${key}' from: ${received}`,
+          level: 'warning',
+        });
+      } catch {
+        // Sentry unavailable
+      }
+    }
+    return `${marker}${recordId}`;
+  };
+
+  const out: Record<string, unknown> = { ...fields };
+  for (const [key, targetAppId] of refFields) {
+    const value = out[key];
+    if (value === undefined || value === null) continue;
+    out[key] = Array.isArray(value)
+      ? value.map((v) => toSuffix(key, targetAppId, v))
+      : toSuffix(key, targetAppId, value);
+  }
+  return out;
+}
+
+
 async function throwSubmitError(res: Response): Promise<never> {
   if (res.status === 404 || res.status === 405) throw new PageUnavailableError();
   if (res.status === 429) throw new RateLimitedError();
@@ -338,7 +430,23 @@ async function throwSubmitError(res: Response): Promise<never> {
       Array.isArray(detail.unallowed_fields) ? (detail.unallowed_fields as string[]) : [],
       Array.isArray(detail.preset_fields) ? (detail.preset_fields as string[]) : [],
     );
-    throw new FieldValidationError(missing, unallowed);
+    // problem+json `detail` is the server's diagnostic (e.g. which record-URL
+    // forms an applookup accepts). Dropping it made the dokument-einreichen
+    // 400 undiagnosable in the UI — carry it on the error, and report a 400
+    // that maps to NO field (illegal_field_value etc.) to Sentry.
+    const detailText = typeof detail.detail === 'string' ? detail.detail : `HTTP ${res.status}`;
+    if (missing.length > 0 || unallowed.length > 0) {
+      throw new FieldValidationError(missing, unallowed, detailText);
+    }
+    try {
+      Sentry.captureException(new Error(`public submit rejected: ${detailText}`), {
+        tags: { feature: 'public-pages' },
+        extra: { detail },
+      });
+    } catch {
+      // Sentry unavailable
+    }
+    throw new SubmitFailedError(detailText);
   }
   try {
     Sentry.captureException(new Error(`public submit failed: HTTP ${res.status}`), {
@@ -361,6 +469,7 @@ export async function createPublicRecord(
   page: PublicPageConfig,
   fields: Record<string, unknown>,
 ): Promise<PublicRecordResult> {
+  fields = normalizeApplookupRefs(cfg, page, fields);
   const path = `/apps/${page.app_id}/records`;
   for (let attempt = 0; ; attempt++) {
     const headers: Record<string, string> = {

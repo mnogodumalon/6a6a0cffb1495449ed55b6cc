@@ -28,6 +28,7 @@ import type { ComputedContext } from '@/config/form-enhancements/types';
 import { applyFieldOrder, flattenFieldOrder, applyDefaults, evalComputed, numberInputProps, clampNumberValue, classifyComputed, extractApplookupRefs, mergeApplookupRefs, resolveApplookupRef } from '@/config/form-enhancements/types';
 import { formEnhancements, computedDeps, computedApplookupRefs } from '@/config/form-enhancements/Foerderantraege';
 import { AttachmentsSection } from '@/components/AttachmentsSection';
+import { t, appLabel, fieldLabel, lookupLabel, localeTag, CURRENCY } from '@/i18n';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Select, SelectContent, SelectItem,
@@ -239,7 +240,7 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
       await onSubmit(clean as Foerderantraege['fields']);
       onClose();
     } catch (err) {
-      setSubmitError(err instanceof Error && err.message ? err.message : 'Speichern fehlgeschlagen.');
+      setSubmitError(err instanceof Error && err.message ? err.message : t('submit_error'));
     } finally {
       setSaving(false);
     }
@@ -323,7 +324,7 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
       setScanSuccess(true);
       setTimeout(() => setScanSuccess(false), 3000);
     } catch (err) {
-      console.error('Scan fehlgeschlagen:', err);
+      console.error(`${t('scan_error')}:`, err);
       alert(err instanceof Error ? err.message : String(err));
     } finally {
       setScanning(false);
@@ -358,12 +359,14 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
     }
   }, []);
 
-  const DIALOG_INTENT = defaultValues ? 'Förderanträge bearbeiten' : 'Förderanträge hinzufügen';
+  const DIALOG_INTENT = defaultValues
+    ? t('edit_entity', { entity: appLabel('foerderantraege') })
+    : t('new_entity', { entity: appLabel('foerderantraege') });
 
   const fieldBlocks: Record<string, React.ReactNode> = {
     'anrede': (
       <div key="anrede" className="space-y-1.5">
-        <Label htmlFor="anrede">Anrede</Label>
+        <Label htmlFor="anrede">{fieldLabel('foerderantraege', 'anrede')}</Label>
         <div role="radiogroup" className="flex flex-wrap gap-1.5">
           <button
             type="button"
@@ -376,7 +379,7 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
                 : 'bg-background text-foreground border-input hover:bg-accent'
             }`}
           >
-            Herr
+            {lookupLabel('foerderantraege', 'anrede', 'herr') ?? 'Herr'}
           </button>
           <button
             type="button"
@@ -389,7 +392,7 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
                 : 'bg-background text-foreground border-input hover:bg-accent'
             }`}
           >
-            Frau
+            {lookupLabel('foerderantraege', 'anrede', 'frau') ?? 'Frau'}
           </button>
           <button
             type="button"
@@ -402,7 +405,7 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
                 : 'bg-background text-foreground border-input hover:bg-accent'
             }`}
           >
-            Divers
+            {lookupLabel('foerderantraege', 'anrede', 'divers') ?? 'Divers'}
           </button>
           <button
             type="button"
@@ -415,47 +418,47 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
                 : 'bg-background text-foreground border-input hover:bg-accent'
             }`}
           >
-            Keine Angabe
+            {lookupLabel('foerderantraege', 'anrede', 'keine_angabe') ?? 'Keine Angabe'}
           </button>
         </div>
       </div>
     ),
     'antragsteller_vorname': (
       <div key="antragsteller_vorname" className="space-y-1.5">
-        <Label htmlFor="antragsteller_vorname">Vorname <span className="text-destructive" aria-hidden="true">*</span></Label>
+        <Label htmlFor="antragsteller_vorname">{fieldLabel('foerderantraege', 'antragsteller_vorname')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <Input
           id="antragsteller_vorname"
-          placeholder="z. B. Anna"
+          placeholder=""
           value={fields.antragsteller_vorname ?? ''}
           onChange={e => setFields(f => ({ ...f, antragsteller_vorname: e.target.value }))}
           required
         />
         {showErrors && !fields.antragsteller_vorname && (
-          <p className="text-xs text-destructive mt-1">Pflichtfeld</p>
+          <p className="text-xs text-destructive mt-1">{t('required_hint')}</p>
         )}
       </div>
     ),
     'antragsteller_nachname': (
       <div key="antragsteller_nachname" className="space-y-1.5">
-        <Label htmlFor="antragsteller_nachname">Nachname <span className="text-destructive" aria-hidden="true">*</span></Label>
+        <Label htmlFor="antragsteller_nachname">{fieldLabel('foerderantraege', 'antragsteller_nachname')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <Input
           id="antragsteller_nachname"
-          placeholder="z. B. Schmidt"
+          placeholder=""
           value={fields.antragsteller_nachname ?? ''}
           onChange={e => setFields(f => ({ ...f, antragsteller_nachname: e.target.value }))}
           required
         />
         {showErrors && !fields.antragsteller_nachname && (
-          <p className="text-xs text-destructive mt-1">Pflichtfeld</p>
+          <p className="text-xs text-destructive mt-1">{t('required_hint')}</p>
         )}
       </div>
     ),
     'organisation': (
       <div key="organisation" className="space-y-1.5">
-        <Label htmlFor="organisation">Organisation / Institution</Label>
+        <Label htmlFor="organisation">{fieldLabel('foerderantraege', 'organisation')}</Label>
         <Input
           id="organisation"
-          placeholder="z. B. Kulturzentrum XYZ"
+          placeholder=""
           value={fields.organisation ?? ''}
           onChange={e => setFields(f => ({ ...f, organisation: e.target.value }))}
         />
@@ -463,90 +466,90 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
     ),
     'rechtsform': (
       <div key="rechtsform" className="space-y-1.5">
-        <Label htmlFor="rechtsform">Rechtsform</Label>
+        <Label htmlFor="rechtsform">{fieldLabel('foerderantraege', 'rechtsform')}</Label>
         <Select
           value={lookupKey(fields.rechtsform) ?? ''}
           onValueChange={v => setFields(f => ({ ...f, rechtsform: v === 'none' ? undefined : v as any }))}
         >
-          <SelectTrigger id="rechtsform" className="max-sm:h-11"><SelectValue placeholder="z. B. e.V., GmbH" /></SelectTrigger>
+          <SelectTrigger id="rechtsform" className="max-sm:h-11"><SelectValue placeholder="" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="none">—</SelectItem>
-            <SelectItem value="ev">Eingetragener Verein (e.V.)</SelectItem>
-            <SelectItem value="gmbh">GmbH</SelectItem>
-            <SelectItem value="gbr">GbR</SelectItem>
-            <SelectItem value="einzelperson">Einzelperson</SelectItem>
-            <SelectItem value="stiftung">Stiftung</SelectItem>
-            <SelectItem value="sonstige">Sonstige</SelectItem>
+            <SelectItem value="ev">{lookupLabel('foerderantraege', 'rechtsform', 'ev') ?? 'Eingetragener Verein (e.V.)'}</SelectItem>
+            <SelectItem value="gmbh">{lookupLabel('foerderantraege', 'rechtsform', 'gmbh') ?? 'GmbH'}</SelectItem>
+            <SelectItem value="gbr">{lookupLabel('foerderantraege', 'rechtsform', 'gbr') ?? 'GbR'}</SelectItem>
+            <SelectItem value="einzelperson">{lookupLabel('foerderantraege', 'rechtsform', 'einzelperson') ?? 'Einzelperson'}</SelectItem>
+            <SelectItem value="stiftung">{lookupLabel('foerderantraege', 'rechtsform', 'stiftung') ?? 'Stiftung'}</SelectItem>
+            <SelectItem value="sonstige">{lookupLabel('foerderantraege', 'rechtsform', 'sonstige') ?? 'Sonstige'}</SelectItem>
           </SelectContent>
         </Select>
       </div>
     ),
     'strasse': (
       <div key="strasse" className="space-y-1.5">
-        <Label htmlFor="strasse">Straße <span className="text-destructive" aria-hidden="true">*</span></Label>
+        <Label htmlFor="strasse">{fieldLabel('foerderantraege', 'strasse')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <Input
           id="strasse"
-          placeholder="z. B. Hauptstraße"
+          placeholder=""
           value={fields.strasse ?? ''}
           onChange={e => setFields(f => ({ ...f, strasse: e.target.value }))}
           required
         />
         {showErrors && !fields.strasse && (
-          <p className="text-xs text-destructive mt-1">Pflichtfeld</p>
+          <p className="text-xs text-destructive mt-1">{t('required_hint')}</p>
         )}
       </div>
     ),
     'hausnummer': (
       <div key="hausnummer" className="space-y-1.5">
-        <Label htmlFor="hausnummer">Hausnummer <span className="text-destructive" aria-hidden="true">*</span></Label>
+        <Label htmlFor="hausnummer">{fieldLabel('foerderantraege', 'hausnummer')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <Input
           id="hausnummer"
-          placeholder="z. B. 42"
+          placeholder=""
           value={fields.hausnummer ?? ''}
           onChange={e => setFields(f => ({ ...f, hausnummer: e.target.value }))}
           required
         />
         {showErrors && !fields.hausnummer && (
-          <p className="text-xs text-destructive mt-1">Pflichtfeld</p>
+          <p className="text-xs text-destructive mt-1">{t('required_hint')}</p>
         )}
       </div>
     ),
     'plz': (
       <div key="plz" className="space-y-1.5">
-        <Label htmlFor="plz">Postleitzahl <span className="text-destructive" aria-hidden="true">*</span></Label>
+        <Label htmlFor="plz">{fieldLabel('foerderantraege', 'plz')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <Input
           id="plz"
-          placeholder="z. B. 10115"
+          placeholder=""
           value={fields.plz ?? ''}
           onChange={e => setFields(f => ({ ...f, plz: e.target.value }))}
           required
         />
         {showErrors && !fields.plz && (
-          <p className="text-xs text-destructive mt-1">Pflichtfeld</p>
+          <p className="text-xs text-destructive mt-1">{t('required_hint')}</p>
         )}
       </div>
     ),
     'ort': (
       <div key="ort" className="space-y-1.5">
-        <Label htmlFor="ort">Ort <span className="text-destructive" aria-hidden="true">*</span></Label>
+        <Label htmlFor="ort">{fieldLabel('foerderantraege', 'ort')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <Input
           id="ort"
-          placeholder="z. B. Berlin"
+          placeholder=""
           value={fields.ort ?? ''}
           onChange={e => setFields(f => ({ ...f, ort: e.target.value }))}
           required
         />
         {showErrors && !fields.ort && (
-          <p className="text-xs text-destructive mt-1">Pflichtfeld</p>
+          <p className="text-xs text-destructive mt-1">{t('required_hint')}</p>
         )}
       </div>
     ),
     'land': (
       <div key="land" className="space-y-1.5">
-        <Label htmlFor="land">Land</Label>
+        <Label htmlFor="land">{fieldLabel('foerderantraege', 'land')}</Label>
         <Input
           id="land"
-          placeholder="z. B. Deutschland"
+          placeholder=""
           value={fields.land ?? ''}
           onChange={e => setFields(f => ({ ...f, land: e.target.value }))}
         />
@@ -554,22 +557,22 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
     ),
     'antragsteller_email': (
       <div key="antragsteller_email" className="space-y-1.5">
-        <Label htmlFor="antragsteller_email">E-Mail-Adresse des Antragstellers <span className="text-destructive" aria-hidden="true">*</span></Label>
+        <Label htmlFor="antragsteller_email">{fieldLabel('foerderantraege', 'antragsteller_email')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <Input
           id="antragsteller_email"
           type="email"
-          placeholder="z. B. anna@beispiel.de"
+          placeholder=""
           value={fields.antragsteller_email ?? ''}
           onChange={e => setFields(f => ({ ...f, antragsteller_email: e.target.value }))}
         />
         {showErrors && !fields.antragsteller_email && (
-          <p className="text-xs text-destructive mt-1">Pflichtfeld</p>
+          <p className="text-xs text-destructive mt-1">{t('required_hint')}</p>
         )}
       </div>
     ),
     'antragsteller_telefon': (
       <div key="antragsteller_telefon" className="space-y-1.5">
-        <Label htmlFor="antragsteller_telefon">Telefonnummer des Antragstellers</Label>
+        <Label htmlFor="antragsteller_telefon">{fieldLabel('foerderantraege', 'antragsteller_telefon')}</Label>
         <Input
           id="antragsteller_telefon"
           value={fields.antragsteller_telefon ?? ''}
@@ -579,7 +582,7 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
     ),
     'antragsteller_website': (
       <div key="antragsteller_website" className="space-y-1.5">
-        <Label htmlFor="antragsteller_website">Website des Antragstellers</Label>
+        <Label htmlFor="antragsteller_website">{fieldLabel('foerderantraege', 'antragsteller_website')}</Label>
         <Input
           id="antragsteller_website"
           value={fields.antragsteller_website ?? ''}
@@ -589,72 +592,72 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
     ),
     'projekttitel': (
       <div key="projekttitel" className="space-y-1.5">
-        <Label htmlFor="projekttitel">Projekttitel <span className="text-destructive" aria-hidden="true">*</span></Label>
+        <Label htmlFor="projekttitel">{fieldLabel('foerderantraege', 'projekttitel')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <Input
           id="projekttitel"
-          placeholder="z. B. Kunstfestival 2026"
+          placeholder=""
           value={fields.projekttitel ?? ''}
           onChange={e => setFields(f => ({ ...f, projekttitel: e.target.value }))}
           required
         />
         {showErrors && !fields.projekttitel && (
-          <p className="text-xs text-destructive mt-1">Pflichtfeld</p>
+          <p className="text-xs text-destructive mt-1">{t('required_hint')}</p>
         )}
       </div>
     ),
     'projektkurzbeschreibung': (
       <div key="projektkurzbeschreibung" className="space-y-1.5">
-        <Label htmlFor="projektkurzbeschreibung">Kurzbeschreibung des Projekts <span className="text-destructive" aria-hidden="true">*</span></Label>
+        <Label htmlFor="projektkurzbeschreibung">{fieldLabel('foerderantraege', 'projektkurzbeschreibung')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <Textarea
           id="projektkurzbeschreibung"
-          placeholder="Kurze Zusammenfassung des Projekts — Ziel, Inhalt, Besonderheiten"
+          placeholder=""
           value={fields.projektkurzbeschreibung ?? ''}
           onChange={e => setFields(f => ({ ...f, projektkurzbeschreibung: e.target.value }))}
           rows={3}
         />
         {showErrors && !fields.projektkurzbeschreibung && (
-          <p className="text-xs text-destructive mt-1">Pflichtfeld</p>
+          <p className="text-xs text-destructive mt-1">{t('required_hint')}</p>
         )}
       </div>
     ),
     'projektbeginn': (
       <div key="projektbeginn" className="space-y-1.5">
-        <Label htmlFor="projektbeginn">Projektbeginn <span className="text-destructive" aria-hidden="true">*</span></Label>
+        <Label htmlFor="projektbeginn">{fieldLabel('foerderantraege', 'projektbeginn')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <DatePicker
           id="projektbeginn"
-          placeholder="Wann startet das Projekt?"
+          placeholder=""
           mode="date"
           value={fields.projektbeginn ?? null}
           onChange={v => setFields(f => ({ ...f, projektbeginn: v ?? undefined }))}
           required
         />
         {showErrors && !fields.projektbeginn && (
-          <p className="text-xs text-destructive mt-1">Pflichtfeld</p>
+          <p className="text-xs text-destructive mt-1">{t('required_hint')}</p>
         )}
       </div>
     ),
     'projektende': (
       <div key="projektende" className="space-y-1.5">
-        <Label htmlFor="projektende">Projektende <span className="text-destructive" aria-hidden="true">*</span></Label>
+        <Label htmlFor="projektende">{fieldLabel('foerderantraege', 'projektende')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <DatePicker
           id="projektende"
-          placeholder="Wann endet das Projekt?"
+          placeholder=""
           mode="date"
           value={fields.projektende ?? null}
           onChange={v => setFields(f => ({ ...f, projektende: v ?? undefined }))}
           required
         />
         {showErrors && !fields.projektende && (
-          <p className="text-xs text-destructive mt-1">Pflichtfeld</p>
+          <p className="text-xs text-destructive mt-1">{t('required_hint')}</p>
         )}
       </div>
     ),
     'projektort': (
       <div key="projektort" className="space-y-1.5">
-        <Label htmlFor="projektort">Projektort</Label>
+        <Label htmlFor="projektort">{fieldLabel('foerderantraege', 'projektort')}</Label>
         <Input
           id="projektort"
-          placeholder="z. B. Berlin-Mitte"
+          placeholder=""
           value={fields.projektort ?? ''}
           onChange={e => setFields(f => ({ ...f, projektort: e.target.value }))}
         />
@@ -662,10 +665,10 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
     ),
     'foerderprogramm': (
       <div key="foerderprogramm" className="space-y-1.5">
-        <Label htmlFor="foerderprogramm">Förderprogramm</Label>
+        <Label htmlFor="foerderprogramm">{fieldLabel('foerderantraege', 'foerderprogramm')}</Label>
         <Input
           id="foerderprogramm"
-          placeholder="z. B. Programm A 2026"
+          placeholder=""
           value={fields.foerderprogramm ?? ''}
           onChange={e => setFields(f => ({ ...f, foerderprogramm: e.target.value }))}
         />
@@ -673,67 +676,67 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
     ),
     'foerderkategorie': (
       <div key="foerderkategorie" className="space-y-1.5">
-        <Label htmlFor="foerderkategorie">Förderkategorie</Label>
+        <Label htmlFor="foerderkategorie">{fieldLabel('foerderantraege', 'foerderkategorie')}</Label>
         <Select
           value={lookupKey(fields.foerderkategorie) ?? ''}
           onValueChange={v => setFields(f => ({ ...f, foerderkategorie: v === 'none' ? undefined : v as any }))}
         >
-          <SelectTrigger id="foerderkategorie" className="max-sm:h-11"><SelectValue placeholder="z. B. Kultur & Bildung" /></SelectTrigger>
+          <SelectTrigger id="foerderkategorie" className="max-sm:h-11"><SelectValue placeholder="" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="none">—</SelectItem>
-            <SelectItem value="kultur_bildung">Kultur & Bildung</SelectItem>
-            <SelectItem value="soziales_integration">Soziales & Integration</SelectItem>
-            <SelectItem value="umwelt_nachhaltigkeit">Umwelt & Nachhaltigkeit</SelectItem>
-            <SelectItem value="wirtschaft_innovation">Wirtschaft & Innovation</SelectItem>
-            <SelectItem value="sport_gesundheit">Sport & Gesundheit</SelectItem>
-            <SelectItem value="sonstige_kategorie">Sonstige</SelectItem>
+            <SelectItem value="kultur_bildung">{lookupLabel('foerderantraege', 'foerderkategorie', 'kultur_bildung') ?? 'Kultur & Bildung'}</SelectItem>
+            <SelectItem value="soziales_integration">{lookupLabel('foerderantraege', 'foerderkategorie', 'soziales_integration') ?? 'Soziales & Integration'}</SelectItem>
+            <SelectItem value="umwelt_nachhaltigkeit">{lookupLabel('foerderantraege', 'foerderkategorie', 'umwelt_nachhaltigkeit') ?? 'Umwelt & Nachhaltigkeit'}</SelectItem>
+            <SelectItem value="wirtschaft_innovation">{lookupLabel('foerderantraege', 'foerderkategorie', 'wirtschaft_innovation') ?? 'Wirtschaft & Innovation'}</SelectItem>
+            <SelectItem value="sport_gesundheit">{lookupLabel('foerderantraege', 'foerderkategorie', 'sport_gesundheit') ?? 'Sport & Gesundheit'}</SelectItem>
+            <SelectItem value="sonstige_kategorie">{lookupLabel('foerderantraege', 'foerderkategorie', 'sonstige_kategorie') ?? 'Sonstige'}</SelectItem>
           </SelectContent>
         </Select>
       </div>
     ),
     'gesamtkosten': (
       <div key="gesamtkosten" className="space-y-1.5">
-        <Label htmlFor="gesamtkosten">Gesamtkosten des Projekts (€) <span className="text-destructive" aria-hidden="true">*</span></Label>
+        <Label htmlFor="gesamtkosten">{fieldLabel('foerderantraege', 'gesamtkosten')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <Input
           id="gesamtkosten"
           type="number"
           step="any"
           {...numberInputProps(formEnhancements, 'gesamtkosten')}
-          placeholder="z. B. 50000"
+          placeholder=""
           value={fields.gesamtkosten !== undefined ? fields.gesamtkosten : (computedValues['gesamtkosten'] ?? '')}
           onChange={e => setFields(f => ({ ...f, gesamtkosten: clampNumberValue(formEnhancements, 'gesamtkosten', e.target.value) }))}
         />
         {showErrors && !fields.gesamtkosten && (
-          <p className="text-xs text-destructive mt-1">Pflichtfeld</p>
+          <p className="text-xs text-destructive mt-1">{t('required_hint')}</p>
         )}
       </div>
     ),
     'beantragter_foerderbetrag': (
       <div key="beantragter_foerderbetrag" className="space-y-1.5">
-        <Label htmlFor="beantragter_foerderbetrag">Beantragter Förderbetrag (€) <span className="text-destructive" aria-hidden="true">*</span></Label>
+        <Label htmlFor="beantragter_foerderbetrag">{fieldLabel('foerderantraege', 'beantragter_foerderbetrag')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <Input
           id="beantragter_foerderbetrag"
           type="number"
           step="any"
           {...numberInputProps(formEnhancements, 'beantragter_foerderbetrag')}
-          placeholder="z. B. 35000"
+          placeholder=""
           value={fields.beantragter_foerderbetrag !== undefined ? fields.beantragter_foerderbetrag : (computedValues['beantragter_foerderbetrag'] ?? '')}
           onChange={e => setFields(f => ({ ...f, beantragter_foerderbetrag: clampNumberValue(formEnhancements, 'beantragter_foerderbetrag', e.target.value) }))}
         />
         {showErrors && !fields.beantragter_foerderbetrag && (
-          <p className="text-xs text-destructive mt-1">Pflichtfeld</p>
+          <p className="text-xs text-destructive mt-1">{t('required_hint')}</p>
         )}
       </div>
     ),
     'eigenanteil': (
       <div key="eigenanteil" className="space-y-1.5">
-        <Label htmlFor="eigenanteil">Eigenanteil (€)</Label>
+        <Label htmlFor="eigenanteil">{fieldLabel('foerderantraege', 'eigenanteil')}</Label>
         <Input
           id="eigenanteil"
           type="number"
           step="any"
           {...numberInputProps(formEnhancements, 'eigenanteil')}
-          placeholder="z. B. 10000"
+          placeholder=""
           value={fields.eigenanteil !== undefined ? fields.eigenanteil : (computedValues['eigenanteil'] ?? '')}
           onChange={e => setFields(f => ({ ...f, eigenanteil: clampNumberValue(formEnhancements, 'eigenanteil', e.target.value) }))}
         />
@@ -741,13 +744,13 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
     ),
     'drittmittel': (
       <div key="drittmittel" className="space-y-1.5">
-        <Label htmlFor="drittmittel">Drittmittel (€)</Label>
+        <Label htmlFor="drittmittel">{fieldLabel('foerderantraege', 'drittmittel')}</Label>
         <Input
           id="drittmittel"
           type="number"
           step="any"
           {...numberInputProps(formEnhancements, 'drittmittel')}
-          placeholder="z. B. 5000"
+          placeholder=""
           value={fields.drittmittel !== undefined ? fields.drittmittel : (computedValues['drittmittel'] ?? '')}
           onChange={e => setFields(f => ({ ...f, drittmittel: clampNumberValue(formEnhancements, 'drittmittel', e.target.value) }))}
         />
@@ -755,10 +758,10 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
     ),
     'finanzierungsplan': (
       <div key="finanzierungsplan" className="space-y-1.5">
-        <Label htmlFor="finanzierungsplan">Finanzierungsplan</Label>
+        <Label htmlFor="finanzierungsplan">{fieldLabel('foerderantraege', 'finanzierungsplan')}</Label>
         <Textarea
           id="finanzierungsplan"
-          placeholder="Wie wird das Projekt finanziert? Welche Quellen, Zeitplan"
+          placeholder=""
           value={fields.finanzierungsplan ?? ''}
           onChange={e => setFields(f => ({ ...f, finanzierungsplan: e.target.value }))}
           rows={3}
@@ -767,25 +770,25 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
     ),
     'projektziele': (
       <div key="projektziele" className="space-y-1.5">
-        <Label htmlFor="projektziele">Projektziele <span className="text-destructive" aria-hidden="true">*</span></Label>
+        <Label htmlFor="projektziele">{fieldLabel('foerderantraege', 'projektziele')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <Textarea
           id="projektziele"
-          placeholder="Was soll erreicht werden? Konkrete, messbare Ziele"
+          placeholder=""
           value={fields.projektziele ?? ''}
           onChange={e => setFields(f => ({ ...f, projektziele: e.target.value }))}
           rows={3}
         />
         {showErrors && !fields.projektziele && (
-          <p className="text-xs text-destructive mt-1">Pflichtfeld</p>
+          <p className="text-xs text-destructive mt-1">{t('required_hint')}</p>
         )}
       </div>
     ),
     'zielgruppe': (
       <div key="zielgruppe" className="space-y-1.5">
-        <Label htmlFor="zielgruppe">Zielgruppe</Label>
+        <Label htmlFor="zielgruppe">{fieldLabel('foerderantraege', 'zielgruppe')}</Label>
         <Textarea
           id="zielgruppe"
-          placeholder="Wer profitiert? Altersgruppen, Region, Bevölkerungsgruppe"
+          placeholder=""
           value={fields.zielgruppe ?? ''}
           onChange={e => setFields(f => ({ ...f, zielgruppe: e.target.value }))}
           rows={3}
@@ -794,10 +797,10 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
     ),
     'massnahmen': (
       <div key="massnahmen" className="space-y-1.5">
-        <Label htmlFor="massnahmen">Geplante Maßnahmen</Label>
+        <Label htmlFor="massnahmen">{fieldLabel('foerderantraege', 'massnahmen')}</Label>
         <Textarea
           id="massnahmen"
-          placeholder="Welche Schritte werden unternommen? Zeitplan, Verantwortliche"
+          placeholder=""
           value={fields.massnahmen ?? ''}
           onChange={e => setFields(f => ({ ...f, massnahmen: e.target.value }))}
           rows={3}
@@ -806,10 +809,10 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
     ),
     'erwartete_ergebnisse': (
       <div key="erwartete_ergebnisse" className="space-y-1.5">
-        <Label htmlFor="erwartete_ergebnisse">Erwartete Ergebnisse</Label>
+        <Label htmlFor="erwartete_ergebnisse">{fieldLabel('foerderantraege', 'erwartete_ergebnisse')}</Label>
         <Textarea
           id="erwartete_ergebnisse"
-          placeholder="Was ist das konkrete Ergebnis? Anzahl Teilnehmer, Werke, Veranstaltungen"
+          placeholder=""
           value={fields.erwartete_ergebnisse ?? ''}
           onChange={e => setFields(f => ({ ...f, erwartete_ergebnisse: e.target.value }))}
           rows={3}
@@ -818,10 +821,10 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
     ),
     'nachhaltigkeit': (
       <div key="nachhaltigkeit" className="space-y-1.5">
-        <Label htmlFor="nachhaltigkeit">Nachhaltigkeit des Projekts</Label>
+        <Label htmlFor="nachhaltigkeit">{fieldLabel('foerderantraege', 'nachhaltigkeit')}</Label>
         <Textarea
           id="nachhaltigkeit"
-          placeholder="Wie wird das Projekt fortgeführt? Langfristige Wirkung"
+          placeholder=""
           value={fields.nachhaltigkeit ?? ''}
           onChange={e => setFields(f => ({ ...f, nachhaltigkeit: e.target.value }))}
           rows={3}
@@ -830,7 +833,7 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
     ),
     'datei_projektbeschreibung': (
       <div key="datei_projektbeschreibung" className="space-y-1.5">
-        <Label htmlFor="datei_projektbeschreibung">Projektbeschreibung (Datei)</Label>
+        <Label htmlFor="datei_projektbeschreibung">{fieldLabel('foerderantraege', 'datei_projektbeschreibung')}</Label>
         {fields.datei_projektbeschreibung ? (
           <div className="flex items-center gap-3 rounded-lg border p-2">
             <div className="relative h-14 w-14 shrink-0 rounded-md bg-muted overflow-hidden">
@@ -850,7 +853,7 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
                 <label
                   className="text-xs text-primary hover:underline cursor-pointer"
                 >
-                  Ändern
+                  {t('fr_change')}
                   <input
                     type="file"
                     accept="image/*,.pdf"
@@ -870,7 +873,7 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
                   className="text-xs text-muted-foreground hover:text-destructive"
                   onClick={() => setFields(f => ({ ...f, datei_projektbeschreibung: undefined }))}
                 >
-                  Entfernen
+                  {t('fr_remove')}
                 </button>
               </div>
             </div>
@@ -880,7 +883,7 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
             className="flex flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-muted-foreground/25 p-4 cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors"
           >
             <IconUpload size={20} className="text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Datei hochladen</span>
+            <span className="text-sm text-muted-foreground">{t('fr_upload_file')}</span>
             <input
               type="file"
               accept="image/*,.pdf"
@@ -900,7 +903,7 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
     ),
     'datei_kostenplan': (
       <div key="datei_kostenplan" className="space-y-1.5">
-        <Label htmlFor="datei_kostenplan">Kostenplan (Datei)</Label>
+        <Label htmlFor="datei_kostenplan">{fieldLabel('foerderantraege', 'datei_kostenplan')}</Label>
         {fields.datei_kostenplan ? (
           <div className="flex items-center gap-3 rounded-lg border p-2">
             <div className="relative h-14 w-14 shrink-0 rounded-md bg-muted overflow-hidden">
@@ -920,7 +923,7 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
                 <label
                   className="text-xs text-primary hover:underline cursor-pointer"
                 >
-                  Ändern
+                  {t('fr_change')}
                   <input
                     type="file"
                     accept="image/*,.pdf"
@@ -940,7 +943,7 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
                   className="text-xs text-muted-foreground hover:text-destructive"
                   onClick={() => setFields(f => ({ ...f, datei_kostenplan: undefined }))}
                 >
-                  Entfernen
+                  {t('fr_remove')}
                 </button>
               </div>
             </div>
@@ -950,7 +953,7 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
             className="flex flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-muted-foreground/25 p-4 cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors"
           >
             <IconUpload size={20} className="text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Datei hochladen</span>
+            <span className="text-sm text-muted-foreground">{t('fr_upload_file')}</span>
             <input
               type="file"
               accept="image/*,.pdf"
@@ -970,7 +973,7 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
     ),
     'datei_weitere_anlagen': (
       <div key="datei_weitere_anlagen" className="space-y-1.5">
-        <Label htmlFor="datei_weitere_anlagen">Weitere Anlagen</Label>
+        <Label htmlFor="datei_weitere_anlagen">{fieldLabel('foerderantraege', 'datei_weitere_anlagen')}</Label>
         {fields.datei_weitere_anlagen ? (
           <div className="flex items-center gap-3 rounded-lg border p-2">
             <div className="relative h-14 w-14 shrink-0 rounded-md bg-muted overflow-hidden">
@@ -990,7 +993,7 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
                 <label
                   className="text-xs text-primary hover:underline cursor-pointer"
                 >
-                  Ändern
+                  {t('fr_change')}
                   <input
                     type="file"
                     accept="image/*,.pdf"
@@ -1010,7 +1013,7 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
                   className="text-xs text-muted-foreground hover:text-destructive"
                   onClick={() => setFields(f => ({ ...f, datei_weitere_anlagen: undefined }))}
                 >
-                  Entfernen
+                  {t('fr_remove')}
                 </button>
               </div>
             </div>
@@ -1020,7 +1023,7 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
             className="flex flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-muted-foreground/25 p-4 cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors"
           >
             <IconUpload size={20} className="text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Datei hochladen</span>
+            <span className="text-sm text-muted-foreground">{t('fr_upload_file')}</span>
             <input
               type="file"
               accept="image/*,.pdf"
@@ -1040,10 +1043,10 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
     ),
     'eingangsdatum': (
       <div key="eingangsdatum" className="space-y-1.5">
-        <Label htmlFor="eingangsdatum">Eingangsdatum des Antrags</Label>
+        <Label htmlFor="eingangsdatum">{fieldLabel('foerderantraege', 'eingangsdatum')}</Label>
         <DatePicker
           id="eingangsdatum"
-          placeholder="Wann ist der Antrag eingegangen?"
+          placeholder=""
           mode="date"
           value={fields.eingangsdatum ?? null}
           onChange={v => setFields(f => ({ ...f, eingangsdatum: v ?? undefined }))}
@@ -1052,49 +1055,47 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
     ),
     'antragsstatus': (
       <div key="antragsstatus" className="space-y-1.5">
-        <Label htmlFor="antragsstatus">Antragsstatus</Label>
+        <Label htmlFor="antragsstatus">{fieldLabel('foerderantraege', 'antragsstatus')}</Label>
         <Select
           value={lookupKey(fields.antragsstatus) ?? ''}
           onValueChange={v => setFields(f => ({ ...f, antragsstatus: v === 'none' ? undefined : v as any }))}
         >
-          <SelectTrigger id="antragsstatus" className="max-sm:h-11"><SelectValue placeholder="z. B. Eingegangen, In Bearbeitung" /></SelectTrigger>
+          <SelectTrigger id="antragsstatus" className="max-sm:h-11"><SelectValue placeholder="" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="none">—</SelectItem>
-            <SelectItem value="eingegangen">Eingegangen</SelectItem>
-            <SelectItem value="in_bearbeitung">In Bearbeitung</SelectItem>
-            <SelectItem value="nachforderung">Nachforderung</SelectItem>
-            <SelectItem value="bewilligt">Bewilligt</SelectItem>
-            <SelectItem value="abgelehnt">Abgelehnt</SelectItem>
-            <SelectItem value="zurueckgezogen">Zurückgezogen</SelectItem>
+            <SelectItem value="eingegangen">{lookupLabel('foerderantraege', 'antragsstatus', 'eingegangen') ?? 'Eingegangen'}</SelectItem>
+            <SelectItem value="in_bearbeitung">{lookupLabel('foerderantraege', 'antragsstatus', 'in_bearbeitung') ?? 'In Bearbeitung'}</SelectItem>
+            <SelectItem value="nachforderung">{lookupLabel('foerderantraege', 'antragsstatus', 'nachforderung') ?? 'Nachforderung'}</SelectItem>
+            <SelectItem value="bewilligt">{lookupLabel('foerderantraege', 'antragsstatus', 'bewilligt') ?? 'Bewilligt'}</SelectItem>
+            <SelectItem value="abgelehnt">{lookupLabel('foerderantraege', 'antragsstatus', 'abgelehnt') ?? 'Abgelehnt'}</SelectItem>
+            <SelectItem value="zurueckgezogen">{lookupLabel('foerderantraege', 'antragsstatus', 'zurueckgezogen') ?? 'Zurückgezogen'}</SelectItem>
           </SelectContent>
         </Select>
       </div>
     ),
     'bearbeiter': (
       <div key="bearbeiter" className="space-y-1.5">
-        <Label htmlFor="bearbeiter">Zuständiger Sachbearbeiter</Label>
+        <Label htmlFor="bearbeiter">{fieldLabel('foerderantraege', 'bearbeiter')}</Label>
         <Combobox
           id="bearbeiter"
-          placeholder="Welcher Sachbearbeiter ist zuständig?"
+          placeholder=""
           items={sachbearbeiterListAll.map(r => ({
             id: r.record_id,
             label: String(r.fields.vorname ?? r.record_id),
           }))}
           value={extractRecordId(fields.bearbeiter)}
           onChange={id => setFields(f => ({ ...f, bearbeiter: id ? createRecordUrl(APP_IDS.SACHBEARBEITER, id) : undefined }))}
-          searchPlaceholder="Suchen…"
-          emptyText="Kein Treffer"
           onCreateNew={(q) => openCreateSachbearbeiter("bearbeiter", q)}
-          createLabel="Neu in Sachbearbeiter"
+          createLabel={t('create_in', { entity: appLabel('sachbearbeiter') })}
         />
       </div>
     ),
     'bearbeitungsnotizen': (
       <div key="bearbeitungsnotizen" className="space-y-1.5">
-        <Label htmlFor="bearbeitungsnotizen">Bearbeitungsnotizen</Label>
+        <Label htmlFor="bearbeitungsnotizen">{fieldLabel('foerderantraege', 'bearbeitungsnotizen')}</Label>
         <Textarea
           id="bearbeitungsnotizen"
-          placeholder="Interne Notizen, Entscheidungsgründe, offene Fragen"
+          placeholder=""
           value={fields.bearbeitungsnotizen ?? ''}
           onChange={e => setFields(f => ({ ...f, bearbeitungsnotizen: e.target.value }))}
           rows={3}
@@ -1170,9 +1171,9 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
     // Backend-Feld mit €-Label ODER virtueller Computed-Key, dessen Name nach Geld aussieht.
     const looksLikeCurrency = CURRENCY_KEYS.has(k) || /(?:kosten|preis|betrag|gesamt|netto|brutto|summe|mwst|rabatt|anzahlung|umsatz|saldo)/i.test(k);
     if (looksLikeCurrency) {
-      return n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return n.toLocaleString(localeTag(), { style: 'currency', currency: CURRENCY, minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
-    return n.toLocaleString('de-DE', { maximumFractionDigits: 2 });
+    return n.toLocaleString(localeTag(), { maximumFractionDigits: 2 });
   }
 
   return (
@@ -1194,14 +1195,14 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
               }`}
             >
               <IconSparkles className={`h-3.5 w-3.5 ${aiOpen ? '' : 'text-primary'}`} />
-              <span className="hidden sm:inline">KI-Ausfüllen</span>
+              <span className="hidden sm:inline">{t('smart_fill')}</span>
               <IconChevronDown className={`h-3 w-3 transition-transform ${aiOpen ? 'rotate-180' : ''}`} />
             </button>
           )}
         </DialogHeader>
         {enablePhotoScan && aiOpen && (
           <div id="ai-fill-panel" className="border-b bg-muted/20 px-6 py-4 space-y-3">
-            <p className="text-xs text-muted-foreground">Versteht Fotos, Dokumente und Text und füllt alles für dich aus</p>
+            <p className="text-xs text-muted-foreground">{t('scan_header_sub')}</p>
             <div className="flex items-start gap-2 pl-0.5">
               <Checkbox
                 id="ai-use-personal-info"
@@ -1211,21 +1212,21 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
               />
               <span className="text-xs text-muted-foreground leading-snug">
                 <Label htmlFor="ai-use-personal-info" className="text-xs font-normal text-muted-foreground cursor-pointer inline">
-                  KI-Assistent darf zusätzlich Informationen zu meiner Person verwenden
+                  {t('useinfo_label')}
                 </Label>
                 {' '}
                 <button type="button" onClick={handleShowProfileInfo} className="text-xs text-primary hover:underline whitespace-nowrap">
-                  {profileLoading ? 'Lade...' : '(mehr Infos)'}
+                  {profileLoading ? t('useinfo_loading') : `(${t('useinfo_more')})`}
                 </button>
               </span>
             </div>
             {showProfileInfo && (
               <div className="rounded-md border bg-muted/50 p-2 text-xs max-h-40 overflow-y-auto">
-                <p className="font-medium mb-1">Folgende Infos über dich können von der KI genutzt werden:</p>
+                <p className="font-medium mb-1">{t('profile_preamble')}</p>
                 {profileData ? Object.values(profileData).map((v, i) => (
                   <span key={i}>{i > 0 && ", "}{typeof v === "object" ? JSON.stringify(v) : String(v)}</span>
                 )) : (
-                  <span className="text-muted-foreground">Profil konnte nicht geladen werden</span>
+                  <span className="text-muted-foreground">{t('useinfo_error')}</span>
                 )}
               </div>
             )}
@@ -1256,8 +1257,8 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
                     <IconLoader2 className="h-7 w-7 text-primary animate-spin" />
                   </div>
                   <div className="text-center">
-                    <p className="text-sm font-medium">KI analysiert...</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Felder werden automatisch ausgefüllt</p>
+                    <p className="text-sm font-medium">{t('scan_analyzing')}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{t('scan_analyzing_sub')}</p>
                   </div>
                 </div>
               ) : scanSuccess ? (
@@ -1266,8 +1267,8 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
                     <IconCircleCheck className="h-7 w-7 text-green-600 dark:text-green-400" />
                   </div>
                   <div className="text-center">
-                    <p className="text-sm font-medium text-green-700 dark:text-green-400">Felder ausgefüllt!</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Prüfe die Werte und passe sie ggf. an</p>
+                    <p className="text-sm font-medium text-green-700 dark:text-green-400">{t('scan_success')}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{t('scan_success_sub')}</p>
                   </div>
                 </div>
               ) : (
@@ -1276,7 +1277,7 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
                     <IconPhotoPlus className="h-7 w-7 text-primary/70" />
                   </div>
                   <div className="text-center">
-                    <p className="text-sm font-medium">Foto oder Dokument hierher ziehen oder auswählen</p>
+                    <p className="text-sm font-medium">{t('scan_upload')}</p>
                   </div>
                 </div>
               )}
@@ -1300,11 +1301,11 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
             <div className="grid grid-cols-3 gap-2">
               <Button type="button" variant="outline" size="sm" className="h-10 text-xs" disabled={scanning}
                 onClick={e => { e.stopPropagation(); cameraInputRef.current?.click(); }}>
-                <IconCamera className="h-3.5 w-3.5 mr-1" />Kamera
+                <IconCamera className="h-3.5 w-3.5 mr-1" />{t('scan_camera_btn')}
               </Button>
               <Button type="button" variant="outline" size="sm" className="h-10 text-xs" disabled={scanning}
                 onClick={e => { e.stopPropagation(); fileInputRef.current?.click(); }}>
-                <IconUpload className="h-3.5 w-3.5 mr-1" />Foto wählen
+                <IconUpload className="h-3.5 w-3.5 mr-1" />{t('scan_file_btn')}
               </Button>
               <Button type="button" variant="outline" size="sm" className="h-10 text-xs" disabled={scanning}
                 onClick={e => {
@@ -1315,13 +1316,13 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
                     setTimeout(() => { if (fileInputRef.current) fileInputRef.current.accept = 'image/*,application/pdf'; }, 100);
                   }
                 }}>
-                <IconFileText className="h-3.5 w-3.5 mr-1" />Dokument
+                <IconFileText className="h-3.5 w-3.5 mr-1" />{t('scan_doc_btn')}
               </Button>
             </div>
 
             <div className="relative">
               <Textarea
-                placeholder="Text eingeben oder einfügen, z.B. Notizen, E-Mails, Beschreibungen..."
+                placeholder={t('scan_text_placeholder')}
                 value={aiText}
                 onChange={e => {
                   setAiText(e.target.value);
@@ -1349,7 +1350,7 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
                     if (text) setAiText(prev => prev ? prev + '\n' + text : text);
                   } catch {}
                 }}
-                title="Paste"
+                title={t('paste')}
               >
                 <IconClipboard className="h-4 w-4" />
               </button>
@@ -1363,7 +1364,7 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
                 disabled={scanning}
                 onClick={() => handleAiExtract()}
               >
-                <IconSparkles className="h-3.5 w-3.5 mr-1.5" />Analysieren
+                <IconSparkles className="h-3.5 w-3.5 mr-1.5" />{t('scan_text_analyze')}
               </Button>
             )}
           </div>
@@ -1458,7 +1459,7 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
             {showErrors && missingRequired.length > 0 && (
               <p className="text-xs text-destructive flex items-center gap-1.5" role="alert">
                 <IconAlertCircle className="h-3.5 w-3.5 shrink-0" />
-                Bitte fülle die markierten Pflichtfelder aus.
+                {t('missing_required')}
               </p>
             )}
             {recordId && (
@@ -1474,13 +1475,13 @@ export function FoerderantraegeDialog({ open, onClose, onSubmit, defaultValues, 
             </div>
           )}
           <DialogFooter className="sticky bottom-0 border-t bg-background/95 backdrop-blur px-6 py-3 gap-2 max-sm:flex-row">
-            <Button type="button" variant="outline" onClick={onClose} className="max-sm:h-12 max-sm:flex-1 max-sm:text-base">Abbrechen</Button>
+            <Button type="button" variant="outline" onClick={onClose} className="max-sm:h-12 max-sm:flex-1 max-sm:text-base">{t('cancel')}</Button>
             <Button
               type="submit"
               className="max-sm:h-12 max-sm:flex-1 max-sm:text-base"
               disabled={saving || !isDirty || (showErrors && missingRequired.length > 0)}
             >
-              {saving ? 'Speichern...' : defaultValues ? 'Speichern' : 'Erstellen'}
+              {saving ? t('saving') : defaultValues ? t('save') : t('create')}
             </Button>
           </DialogFooter>
         </form>

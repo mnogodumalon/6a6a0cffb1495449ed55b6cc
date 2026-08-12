@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import type { Sachbearbeiter, Foerderantraege } from '@/types/app';
 import { LivingAppsService } from '@/services/livingAppsService';
+import { t } from '@/i18n';
 
 /** Dashboard data + the OPTIMISTIC-WRITE API.
  *
@@ -28,7 +29,7 @@ export function useDashboardData() {
       setSachbearbeiter(sachbearbeiterData);
       setFoerderantraege(foerderantraegeData);
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Fehler beim Laden der Daten'));
+      setError(err instanceof Error ? err : new Error(t('data_load_failed')));
     } finally {
       setLoading(false);
     }

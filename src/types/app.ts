@@ -1,3 +1,5 @@
+import { lookupLabel } from '@/i18n';
+
 // AUTOMATICALLY GENERATED TYPES - DO NOT EDIT
 
 export type LookupValue = { key: string; label: string };
@@ -23,6 +25,12 @@ export interface AttachmentInput {
 
 export interface Sachbearbeiter {
   record_id: string;
+  /** The API field. */
+  created_at: string;
+  updated_at: string | null;
+  /** Alias of created_at, filled by the read helpers. The API sends
+   *  snake_case only — reading `createdat` off a raw record yields
+   *  undefined, which type-checks and then crashes at runtime. */
   createdat: string;
   updatedat: string | null;
   fields: {
@@ -37,6 +45,12 @@ export interface Sachbearbeiter {
 
 export interface Foerderantraege {
   record_id: string;
+  /** The API field. */
+  created_at: string;
+  updated_at: string | null;
+  /** Alias of created_at, filled by the read helpers. The API sends
+   *  snake_case only — reading `createdat` off a raw record yields
+   *  undefined, which type-checks and then crashes at runtime. */
   createdat: string;
   updatedat: string | null;
   fields: {
@@ -88,12 +102,20 @@ export const APP_IDS = {
 
 export const LOOKUP_OPTIONS: Record<string, Record<string, {key: string, label: string}[]>> = {
   'foerderantraege': {
-    anrede: [{ key: "herr", label: "Herr" }, { key: "frau", label: "Frau" }, { key: "divers", label: "Divers" }, { key: "keine_angabe", label: "Keine Angabe" }],
-    rechtsform: [{ key: "ev", label: "Eingetragener Verein (e.V.)" }, { key: "gmbh", label: "GmbH" }, { key: "gbr", label: "GbR" }, { key: "einzelperson", label: "Einzelperson" }, { key: "stiftung", label: "Stiftung" }, { key: "sonstige", label: "Sonstige" }],
-    foerderkategorie: [{ key: "kultur_bildung", label: "Kultur & Bildung" }, { key: "soziales_integration", label: "Soziales & Integration" }, { key: "umwelt_nachhaltigkeit", label: "Umwelt & Nachhaltigkeit" }, { key: "wirtschaft_innovation", label: "Wirtschaft & Innovation" }, { key: "sport_gesundheit", label: "Sport & Gesundheit" }, { key: "sonstige_kategorie", label: "Sonstige" }],
-    antragsstatus: [{ key: "eingegangen", label: "Eingegangen" }, { key: "in_bearbeitung", label: "In Bearbeitung" }, { key: "nachforderung", label: "Nachforderung" }, { key: "bewilligt", label: "Bewilligt" }, { key: "abgelehnt", label: "Abgelehnt" }, { key: "zurueckgezogen", label: "Zurückgezogen" }],
+    anrede: [{ key: "herr", get label() { return lookupLabel('foerderantraege', 'anrede', "herr") ?? "Herr"; } }, { key: "frau", get label() { return lookupLabel('foerderantraege', 'anrede', "frau") ?? "Frau"; } }, { key: "divers", get label() { return lookupLabel('foerderantraege', 'anrede', "divers") ?? "Divers"; } }, { key: "keine_angabe", get label() { return lookupLabel('foerderantraege', 'anrede', "keine_angabe") ?? "Keine Angabe"; } }],
+    rechtsform: [{ key: "ev", get label() { return lookupLabel('foerderantraege', 'rechtsform', "ev") ?? "Eingetragener Verein (e.V.)"; } }, { key: "gmbh", get label() { return lookupLabel('foerderantraege', 'rechtsform', "gmbh") ?? "GmbH"; } }, { key: "gbr", get label() { return lookupLabel('foerderantraege', 'rechtsform', "gbr") ?? "GbR"; } }, { key: "einzelperson", get label() { return lookupLabel('foerderantraege', 'rechtsform', "einzelperson") ?? "Einzelperson"; } }, { key: "stiftung", get label() { return lookupLabel('foerderantraege', 'rechtsform', "stiftung") ?? "Stiftung"; } }, { key: "sonstige", get label() { return lookupLabel('foerderantraege', 'rechtsform', "sonstige") ?? "Sonstige"; } }],
+    foerderkategorie: [{ key: "kultur_bildung", get label() { return lookupLabel('foerderantraege', 'foerderkategorie', "kultur_bildung") ?? "Kultur & Bildung"; } }, { key: "soziales_integration", get label() { return lookupLabel('foerderantraege', 'foerderkategorie', "soziales_integration") ?? "Soziales & Integration"; } }, { key: "umwelt_nachhaltigkeit", get label() { return lookupLabel('foerderantraege', 'foerderkategorie', "umwelt_nachhaltigkeit") ?? "Umwelt & Nachhaltigkeit"; } }, { key: "wirtschaft_innovation", get label() { return lookupLabel('foerderantraege', 'foerderkategorie', "wirtschaft_innovation") ?? "Wirtschaft & Innovation"; } }, { key: "sport_gesundheit", get label() { return lookupLabel('foerderantraege', 'foerderkategorie', "sport_gesundheit") ?? "Sport & Gesundheit"; } }, { key: "sonstige_kategorie", get label() { return lookupLabel('foerderantraege', 'foerderkategorie', "sonstige_kategorie") ?? "Sonstige"; } }],
+    antragsstatus: [{ key: "eingegangen", get label() { return lookupLabel('foerderantraege', 'antragsstatus', "eingegangen") ?? "Eingegangen"; } }, { key: "in_bearbeitung", get label() { return lookupLabel('foerderantraege', 'antragsstatus', "in_bearbeitung") ?? "In Bearbeitung"; } }, { key: "nachforderung", get label() { return lookupLabel('foerderantraege', 'antragsstatus', "nachforderung") ?? "Nachforderung"; } }, { key: "bewilligt", get label() { return lookupLabel('foerderantraege', 'antragsstatus', "bewilligt") ?? "Bewilligt"; } }, { key: "abgelehnt", get label() { return lookupLabel('foerderantraege', 'antragsstatus', "abgelehnt") ?? "Abgelehnt"; } }, { key: "zurueckgezogen", get label() { return lookupLabel('foerderantraege', 'antragsstatus', "zurueckgezogen") ?? "Zurückgezogen"; } }],
   },
 };
+
+// Optimistic LookupValue writes: never re-type a label — resolve the schema
+// option instead (its label is a locale-aware getter; falls back to the key).
+// WRONG: status: { key: 'offen', label: 'Offen' }   (frozen in one language)
+// RIGHT: status: lookupOption('<appKey>', 'status', 'offen')
+export function lookupOption(app: string, field: string, key: string): LookupValue {
+  return LOOKUP_OPTIONS[app]?.[field]?.find(o => o.key === key) ?? { key, label: key };
+}
 
 export const FIELD_TYPES: Record<string, Record<string, string>> = {
   'sachbearbeiter': {

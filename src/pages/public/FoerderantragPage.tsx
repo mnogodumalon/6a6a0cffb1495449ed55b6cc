@@ -28,33 +28,9 @@ import {
   IconAlertTriangle,
   IconFileText,
 } from '@tabler/icons-react';
+import { tx } from '@/i18n';
 
 // ─── Lookup Options (aus Schema) ─────────────────────────────────────────────
-
-const ANREDE_OPTIONS = [
-  { key: 'herr', label: 'Herr' },
-  { key: 'frau', label: 'Frau' },
-  { key: 'divers', label: 'Divers' },
-  { key: 'keine_angabe', label: 'Keine Angabe' },
-];
-
-const RECHTSFORM_OPTIONS = [
-  { key: 'ev', label: 'Eingetragener Verein (e.V.)' },
-  { key: 'gmbh', label: 'GmbH' },
-  { key: 'gbr', label: 'GbR' },
-  { key: 'einzelperson', label: 'Einzelperson' },
-  { key: 'stiftung', label: 'Stiftung' },
-  { key: 'sonstige', label: 'Sonstige' },
-];
-
-const FOERDERKATEGORIE_OPTIONS = [
-  { key: 'kultur_bildung', label: 'Kultur & Bildung' },
-  { key: 'soziales_integration', label: 'Soziales & Integration' },
-  { key: 'umwelt_nachhaltigkeit', label: 'Umwelt & Nachhaltigkeit' },
-  { key: 'wirtschaft_innovation', label: 'Wirtschaft & Innovation' },
-  { key: 'sport_gesundheit', label: 'Sport & Gesundheit' },
-  { key: 'sonstige_kategorie', label: 'Sonstige' },
-];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -91,7 +67,38 @@ interface FormData {
   finanzierungsplan: string;
 }
 
-const INITIAL_FORM: FormData = {
+// ─── Hilfskomponenten ─────────────────────────────────────────────────────────
+
+function SummaryRow({ label, value }: { label: string; value: string }) {
+  if (!value) return null;
+  return (
+    <div className="flex gap-3 min-w-0">
+      <span className="text-muted-foreground text-sm shrink-0 w-44">{label}</span>
+      <span className="text-sm font-medium text-foreground truncate">{value}</span>
+    </div>
+  );
+}
+
+function SectionTitle({ children }: { children: ReactNode }) {
+  return <h3 className="text-base font-semibold text-foreground mt-6 mb-3 first:mt-0">{children}</h3>;
+}
+
+function parseNum(v: string): number {
+  const n = parseFloat(v.replace(',', '.'));
+  return isNaN(n) ? 0 : n;
+}
+
+// ─── Hauptkomponente ──────────────────────────────────────────────────────────
+
+export default function FoerderantragPage() {
+  const WIZARD_STEPS = [
+  { label: tx('Antragsteller') },
+  { label: tx('Projektdetails') },
+  { label: tx('Finanzierung') },
+  { label: tx('Prüfen & Einreichen') },
+];
+
+  const INITIAL_FORM: FormData = {
   anrede: '',
   antragsteller_vorname: '',
   antragsteller_nachname: '',
@@ -124,37 +131,31 @@ const INITIAL_FORM: FormData = {
   finanzierungsplan: '',
 };
 
-const WIZARD_STEPS = [
-  { label: 'Antragsteller' },
-  { label: 'Projektdetails' },
-  { label: 'Finanzierung' },
-  { label: 'Prüfen & Einreichen' },
+  const FOERDERKATEGORIE_OPTIONS = [
+  { key: 'kultur_bildung', label: tx('Kultur & Bildung') },
+  { key: 'soziales_integration', label: tx('Soziales & Integration') },
+  { key: 'umwelt_nachhaltigkeit', label: tx('Umwelt & Nachhaltigkeit') },
+  { key: 'wirtschaft_innovation', label: tx('Wirtschaft & Innovation') },
+  { key: 'sport_gesundheit', label: tx('Sport & Gesundheit') },
+  { key: 'sonstige_kategorie', label: tx('Sonstige') },
 ];
 
-// ─── Hilfskomponenten ─────────────────────────────────────────────────────────
+  const RECHTSFORM_OPTIONS = [
+  { key: 'ev', label: tx('Eingetragener Verein (e.V.)') },
+  { key: 'gmbh', label: tx('GmbH') },
+  { key: 'gbr', label: tx('GbR') },
+  { key: 'einzelperson', label: tx('Einzelperson') },
+  { key: 'stiftung', label: tx('Stiftung') },
+  { key: 'sonstige', label: tx('Sonstige') },
+];
 
-function SummaryRow({ label, value }: { label: string; value: string }) {
-  if (!value) return null;
-  return (
-    <div className="flex gap-3 min-w-0">
-      <span className="text-muted-foreground text-sm shrink-0 w-44">{label}</span>
-      <span className="text-sm font-medium text-foreground truncate">{value}</span>
-    </div>
-  );
-}
+  const ANREDE_OPTIONS = [
+  { key: 'herr', label: tx('Herr') },
+  { key: 'frau', label: tx('Frau') },
+  { key: 'divers', label: tx('Divers') },
+  { key: 'keine_angabe', label: tx('Keine Angabe') },
+];
 
-function SectionTitle({ children }: { children: ReactNode }) {
-  return <h3 className="text-base font-semibold text-foreground mt-6 mb-3 first:mt-0">{children}</h3>;
-}
-
-function parseNum(v: string): number {
-  const n = parseFloat(v.replace(',', '.'));
-  return isNaN(n) ? 0 : n;
-}
-
-// ─── Hauptkomponente ──────────────────────────────────────────────────────────
-
-export default function FoerderantragPage() {
   // Alle Hooks vor den Early-Returns
   const [cfg, setCfg] = useState<PublicPagesConfig | null>(null);
   const [page, setPage] = useState<PublicPageConfig | null>(null);
@@ -259,9 +260,9 @@ export default function FoerderantragPage() {
       setSuccessId(result.id);
     } catch (err) {
       if (err instanceof PageUnavailableError) {
-        setSubmitError('Diese Seite ist derzeit nicht verfügbar. Bitte versuche es später erneut.');
+        setSubmitError(tx('Diese Seite ist derzeit nicht verfügbar. Bitte versuche es später erneut.'));
       } else {
-        setSubmitError(err instanceof Error ? err.message : 'Unbekannter Fehler beim Einreichen.');
+        setSubmitError(err instanceof Error ? err.message : tx('Unbekannter Fehler beim Einreichen.'));
       }
     } finally {
       setSubmitting(false);
@@ -278,15 +279,15 @@ export default function FoerderantragPage() {
   // ─── Erfolgs-Zustand ──────────────────────────────────────────────────────
   if (successId) {
     return (
-      <PublicShell title="Antrag eingereicht">
+      <PublicShell title={tx('Antrag eingereicht')}>
         <div className="flex flex-col items-center justify-center py-16 gap-6">
           <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
             <IconCheck size={32} className="text-primary" stroke={2.5} />
           </div>
           <div className="text-center space-y-2 max-w-sm">
-            <h2 className="text-2xl font-bold tracking-tight">Antrag erfolgreich eingereicht!</h2>
+            <h2 className="text-2xl font-bold tracking-tight">{tx('Antrag erfolgreich eingereicht!')}</h2>
             <p className="text-muted-foreground">
-              Dein Förderantrag wurde übermittelt und wird nun geprüft. Bitte notiere deine Vorgangsnummer für Rückfragen:
+              {tx('Dein Förderantrag wurde übermittelt und wird nun geprüft. Bitte notiere deine Vorgangsnummer für Rückfragen:')}
             </p>
             <div className="flex items-center justify-center gap-2 mt-3">
               <IconFileText size={16} className="text-muted-foreground shrink-0" />
@@ -294,10 +295,10 @@ export default function FoerderantragPage() {
             </div>
           </div>
           <div className="rounded-xl border bg-card p-4 text-sm text-muted-foreground text-center max-w-sm">
-            Du erhältst eine Eingangsbestätigung, sobald dein Antrag bearbeitet wird. Bei Fragen wende dich direkt an uns.
+            {tx('Du erhältst eine Eingangsbestätigung, sobald dein Antrag bearbeitet wird. Bei Fragen wende dich direkt an uns.')}
           </div>
           <Button onClick={handleReset} variant="outline" className="mt-2">
-            Weiteren Antrag einreichen
+            {tx('Weiteren Antrag einreichen')}
           </Button>
         </div>
       </PublicShell>
@@ -307,14 +308,14 @@ export default function FoerderantragPage() {
   // ─── Wizard ───────────────────────────────────────────────────────────────
   return (
     <PublicShell
-      title="Förderantrag einreichen"
-      description="Reiche deinen Förderantrag in wenigen Schritten online ein."
+      title={tx('Förderantrag einreichen')}
+      description={tx('Reiche deinen Förderantrag in wenigen Schritten online ein.')}
     >
       {/* onFocus = Challenge pre-solve beim ersten Tippen */}
       <div onFocus={handleFirstInteraction}>
         <IntentWizardShell
-          title="Förderantrag einreichen"
-          subtitle="Fülle alle Schritte aus. Pflichtfelder sind mit * markiert."
+          title={tx('Förderantrag einreichen')}
+          subtitle={tx('Fülle alle Schritte aus. Pflichtfelder sind mit * markiert.')}
           steps={WIZARD_STEPS}
           currentStep={step}
           onStepChange={setStep}
@@ -326,7 +327,7 @@ export default function FoerderantragPage() {
             <div className="space-y-6">
               {/* Anrede */}
               <div className="space-y-2">
-                <Label>Anrede</Label>
+                <Label>{tx('Anrede')}</Label>
                 <div className="flex flex-wrap gap-2">
                   {ANREDE_OPTIONS.map(opt => (
                     <button
@@ -348,26 +349,26 @@ export default function FoerderantragPage() {
               {/* Name */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="vorname">Vorname <span className="text-destructive">*</span></Label>
-                  <Input id="vorname" value={form.antragsteller_vorname} onChange={set('antragsteller_vorname')} placeholder="Max" />
+                  <Label htmlFor="vorname">{tx('Vorname')} <span className="text-destructive">*</span></Label>
+                  <Input id="vorname" value={form.antragsteller_vorname} onChange={set('antragsteller_vorname')} placeholder={tx('Max')} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="nachname">Nachname <span className="text-destructive">*</span></Label>
-                  <Input id="nachname" value={form.antragsteller_nachname} onChange={set('antragsteller_nachname')} placeholder="Mustermann" />
+                  <Label htmlFor="nachname">{tx('Nachname')} <span className="text-destructive">*</span></Label>
+                  <Input id="nachname" value={form.antragsteller_nachname} onChange={set('antragsteller_nachname')} placeholder={tx('Mustermann')} />
                 </div>
               </div>
 
               {/* Organisation & Rechtsform */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="organisation">Organisation / Institution</Label>
-                  <Input id="organisation" value={form.organisation} onChange={set('organisation')} placeholder="Muster e.V." />
+                  <Label htmlFor="organisation">{tx('Organisation / Institution')}</Label>
+                  <Input id="organisation" value={form.organisation} onChange={set('organisation')} placeholder={tx('Muster e.V.')} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="rechtsform">Rechtsform</Label>
+                  <Label htmlFor="rechtsform">{tx('Rechtsform')}</Label>
                   <Select value={form.rechtsform} onValueChange={setVal('rechtsform')}>
                     <SelectTrigger id="rechtsform">
-                      <SelectValue placeholder="Bitte wählen..." />
+                      <SelectValue placeholder={tx('Bitte wählen...')} />
                     </SelectTrigger>
                     <SelectContent>
                       {RECHTSFORM_OPTIONS.map(opt => (
@@ -381,43 +382,43 @@ export default function FoerderantragPage() {
               {/* Kontakt */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="email">E-Mail <span className="text-destructive">*</span></Label>
-                  <Input id="email" type="email" value={form.antragsteller_email} onChange={set('antragsteller_email')} placeholder="max@example.de" />
+                  <Label htmlFor="email">{tx('E-Mail')} <span className="text-destructive">*</span></Label>
+                  <Input id="email" type="email" value={form.antragsteller_email} onChange={set('antragsteller_email')} placeholder={tx('max@example.de')} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="telefon">Telefon</Label>
+                  <Label htmlFor="telefon">{tx('Telefon')}</Label>
                   <Input id="telefon" type="tel" value={form.antragsteller_telefon} onChange={set('antragsteller_telefon')} placeholder="+49 123 456789" />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="website">Website (optional)</Label>
-                <Input id="website" type="url" value={form.antragsteller_website} onChange={set('antragsteller_website')} placeholder="https://www.example.de" />
+                <Label htmlFor="website">{tx('Website (optional)')}</Label>
+                <Input id="website" type="url" value={form.antragsteller_website} onChange={set('antragsteller_website')} placeholder={tx('https://www.example.de')} />
               </div>
 
               {/* Anschrift */}
               <div>
-                <p className="text-sm font-medium text-foreground mb-3">Anschrift</p>
+                <p className="text-sm font-medium text-foreground mb-3">{tx('Anschrift')}</p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="sm:col-span-2 space-y-1.5">
-                    <Label htmlFor="strasse">Straße</Label>
-                    <Input id="strasse" value={form.strasse} onChange={set('strasse')} placeholder="Musterstraße" />
+                    <Label htmlFor="strasse">{tx('Straße')}</Label>
+                    <Input id="strasse" value={form.strasse} onChange={set('strasse')} placeholder={tx('Musterstraße')} />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="hausnummer">Hausnummer</Label>
+                    <Label htmlFor="hausnummer">{tx('Hausnummer')}</Label>
                     <Input id="hausnummer" value={form.hausnummer} onChange={set('hausnummer')} placeholder="12a" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="plz">PLZ</Label>
+                    <Label htmlFor="plz">{tx('PLZ')}</Label>
                     <Input id="plz" value={form.plz} onChange={set('plz')} placeholder="12345" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="ort">Ort</Label>
-                    <Input id="ort" value={form.ort} onChange={set('ort')} placeholder="Berlin" />
+                    <Label htmlFor="ort">{tx('Ort')}</Label>
+                    <Input id="ort" value={form.ort} onChange={set('ort')} placeholder={tx('Berlin')} />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="land">Land</Label>
-                    <Input id="land" value={form.land} onChange={set('land')} placeholder="Deutschland" />
+                    <Label htmlFor="land">{tx('Land')}</Label>
+                    <Input id="land" value={form.land} onChange={set('land')} placeholder={tx('Deutschland')} />
                   </div>
                 </div>
               </div>
@@ -429,7 +430,7 @@ export default function FoerderantragPage() {
                     <IconUser size={16} className="text-primary" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs text-muted-foreground mb-0.5">Antragsteller</p>
+                    <p className="text-xs text-muted-foreground mb-0.5">{tx('Antragsteller')}</p>
                     <p className="font-semibold text-sm truncate">
                       {[form.antragsteller_vorname, form.antragsteller_nachname].filter(Boolean).join(' ') || '—'}
                     </p>
@@ -443,7 +444,7 @@ export default function FoerderantragPage() {
               {/* Navigation */}
               <div className="flex justify-end pt-2">
                 <Button onClick={() => setStep(2)} disabled={!step1Valid} className="gap-2">
-                  Weiter zu Projektdetails
+                  {tx('Weiter zu Projektdetails')}
                   <IconArrowRight size={16} />
                 </Button>
               </div>
@@ -454,17 +455,17 @@ export default function FoerderantragPage() {
           {step === 2 && (
             <div className="space-y-5">
               <div className="space-y-1.5">
-                <Label htmlFor="projekttitel">Projekttitel <span className="text-destructive">*</span></Label>
-                <Input id="projekttitel" value={form.projekttitel} onChange={set('projekttitel')} placeholder="Name deines Projekts" />
+                <Label htmlFor="projekttitel">{tx('Projekttitel')} <span className="text-destructive">*</span></Label>
+                <Input id="projekttitel" value={form.projekttitel} onChange={set('projekttitel')} placeholder={tx('Name deines Projekts')} />
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="projektkurzbeschreibung">Kurzbeschreibung <span className="text-destructive">*</span></Label>
+                <Label htmlFor="projektkurzbeschreibung">{tx('Kurzbeschreibung')} <span className="text-destructive">*</span></Label>
                 <Textarea
                   id="projektkurzbeschreibung"
                   value={form.projektkurzbeschreibung}
                   onChange={set('projektkurzbeschreibung')}
-                  placeholder="Beschreibe dein Projekt in 2–3 Sätzen..."
+                  placeholder={tx('Beschreibe dein Projekt in 2–3 Sätzen...')}
                   rows={3}
                 />
               </div>
@@ -472,29 +473,29 @@ export default function FoerderantragPage() {
               {/* Laufzeit */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="projektbeginn">Projektbeginn</Label>
+                  <Label htmlFor="projektbeginn">{tx('Projektbeginn')}</Label>
                   <Input id="projektbeginn" type="date" value={form.projektbeginn} onChange={set('projektbeginn')} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="projektende">Projektende</Label>
+                  <Label htmlFor="projektende">{tx('Projektende')}</Label>
                   <Input id="projektende" type="date" value={form.projektende} onChange={set('projektende')} />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="projektort">Projektort</Label>
-                  <Input id="projektort" value={form.projektort} onChange={set('projektort')} placeholder="Berlin" />
+                  <Label htmlFor="projektort">{tx('Projektort')}</Label>
+                  <Input id="projektort" value={form.projektort} onChange={set('projektort')} placeholder={tx('Berlin')} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="foerderprogramm">Förderprogramm</Label>
-                  <Input id="foerderprogramm" value={form.foerderprogramm} onChange={set('foerderprogramm')} placeholder="z.B. Bundesförderung XY" />
+                  <Label htmlFor="foerderprogramm">{tx('Förderprogramm')}</Label>
+                  <Input id="foerderprogramm" value={form.foerderprogramm} onChange={set('foerderprogramm')} placeholder={tx('z.B. Bundesförderung XY')} />
                 </div>
               </div>
 
               {/* Förderkategorie Kacheln */}
               <div className="space-y-2">
-                <Label>Förderkategorie</Label>
+                <Label>{tx('Förderkategorie')}</Label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {FOERDERKATEGORIE_OPTIONS.map(opt => (
                     <button
@@ -514,28 +515,28 @@ export default function FoerderantragPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="projektziele">Projektziele <span className="text-destructive">*</span></Label>
-                <Textarea id="projektziele" value={form.projektziele} onChange={set('projektziele')} placeholder="Was soll das Projekt erreichen?" rows={3} />
+                <Label htmlFor="projektziele">{tx('Projektziele')} <span className="text-destructive">*</span></Label>
+                <Textarea id="projektziele" value={form.projektziele} onChange={set('projektziele')} placeholder={tx('Was soll das Projekt erreichen?')} rows={3} />
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="zielgruppe">Zielgruppe</Label>
-                <Textarea id="zielgruppe" value={form.zielgruppe} onChange={set('zielgruppe')} placeholder="Wen soll das Projekt ansprechen?" rows={2} />
+                <Label htmlFor="zielgruppe">{tx('Zielgruppe')}</Label>
+                <Textarea id="zielgruppe" value={form.zielgruppe} onChange={set('zielgruppe')} placeholder={tx('Wen soll das Projekt ansprechen?')} rows={2} />
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="massnahmen">Geplante Maßnahmen</Label>
-                <Textarea id="massnahmen" value={form.massnahmen} onChange={set('massnahmen')} placeholder="Welche konkreten Maßnahmen sind geplant?" rows={3} />
+                <Label htmlFor="massnahmen">{tx('Geplante Maßnahmen')}</Label>
+                <Textarea id="massnahmen" value={form.massnahmen} onChange={set('massnahmen')} placeholder={tx('Welche konkreten Maßnahmen sind geplant?')} rows={3} />
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="erwartete_ergebnisse">Erwartete Ergebnisse</Label>
-                <Textarea id="erwartete_ergebnisse" value={form.erwartete_ergebnisse} onChange={set('erwartete_ergebnisse')} placeholder="Was wird am Ende des Projekts erreicht sein?" rows={2} />
+                <Label htmlFor="erwartete_ergebnisse">{tx('Erwartete Ergebnisse')}</Label>
+                <Textarea id="erwartete_ergebnisse" value={form.erwartete_ergebnisse} onChange={set('erwartete_ergebnisse')} placeholder={tx('Was wird am Ende des Projekts erreicht sein?')} rows={2} />
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="nachhaltigkeit">Nachhaltigkeit</Label>
-                <Textarea id="nachhaltigkeit" value={form.nachhaltigkeit} onChange={set('nachhaltigkeit')} placeholder="Wie wird das Projekt nach der Förderung weitergeführt?" rows={2} />
+                <Label htmlFor="nachhaltigkeit">{tx('Nachhaltigkeit')}</Label>
+                <Textarea id="nachhaltigkeit" value={form.nachhaltigkeit} onChange={set('nachhaltigkeit')} placeholder={tx('Wie wird das Projekt nach der Förderung weitergeführt?')} rows={2} />
               </div>
 
               {/* Live-Vorschau */}
@@ -545,7 +546,7 @@ export default function FoerderantragPage() {
                     <IconCalendar size={16} className="text-primary" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs text-muted-foreground mb-0.5">Projekt</p>
+                    <p className="text-xs text-muted-foreground mb-0.5">{tx('Projekt')}</p>
                     <p className="font-semibold text-sm truncate">{form.projekttitel}</p>
                     {(form.projektbeginn || form.projektende) && (
                       <p className="text-xs text-muted-foreground">
@@ -561,10 +562,10 @@ export default function FoerderantragPage() {
               <div className="flex justify-between pt-2">
                 <Button variant="outline" onClick={() => setStep(1)} className="gap-2">
                   <IconArrowLeft size={16} />
-                  Zurück
+                  {tx('Zurück')}
                 </Button>
                 <Button onClick={() => setStep(3)} disabled={!step2Valid} className="gap-2">
-                  Weiter zur Finanzierung
+                  {tx('Weiter zur Finanzierung')}
                   <IconArrowRight size={16} />
                 </Button>
               </div>
@@ -576,37 +577,37 @@ export default function FoerderantragPage() {
             <div className="space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="gesamtkosten">Gesamtkosten (€) <span className="text-destructive">*</span></Label>
+                  <Label htmlFor="gesamtkosten">{tx('Gesamtkosten (€)')} <span className="text-destructive">*</span></Label>
                   <Input id="gesamtkosten" type="number" min="0" step="0.01" value={form.gesamtkosten} onChange={set('gesamtkosten')} placeholder="50000" />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="foerderbetrag">Beantragter Förderbetrag (€) <span className="text-destructive">*</span></Label>
+                  <Label htmlFor="foerderbetrag">{tx('Beantragter Förderbetrag (€)')} <span className="text-destructive">*</span></Label>
                   <Input id="foerderbetrag" type="number" min="0" step="0.01" value={form.beantragter_foerderbetrag} onChange={set('beantragter_foerderbetrag')} placeholder="30000" />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="eigenanteil">Eigenanteil (€)</Label>
+                  <Label htmlFor="eigenanteil">{tx('Eigenanteil (€)')}</Label>
                   <Input id="eigenanteil" type="number" min="0" step="0.01" value={form.eigenanteil} onChange={set('eigenanteil')} placeholder="10000" />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="drittmittel">Drittmittel (€, optional)</Label>
+                  <Label htmlFor="drittmittel">{tx('Drittmittel (€, optional)')}</Label>
                   <Input id="drittmittel" type="number" min="0" step="0.01" value={form.drittmittel} onChange={set('drittmittel')} placeholder="0" />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="finanzierungsplan">Finanzierungsplan</Label>
+                <Label htmlFor="finanzierungsplan">{tx('Finanzierungsplan')}</Label>
                 <Textarea
                   id="finanzierungsplan"
                   value={form.finanzierungsplan}
                   onChange={set('finanzierungsplan')}
-                  placeholder="Beschreibe, wie die Gesamtkosten aufgeteilt und gedeckt werden..."
+                  placeholder={tx('Beschreibe, wie die Gesamtkosten aufgeteilt und gedeckt werden...')}
                   rows={4}
                 />
               </div>
 
               {/* Budget-Tracker */}
               {gesamtkosten > 0 && (
-                <BudgetTracker budget={gesamtkosten} booked={gedeckt} label="Finanzierungsübersicht" />
+                <BudgetTracker budget={gesamtkosten} booked={gedeckt} label={tx('Finanzierungsübersicht')} />
               )}
 
               {/* Deckungsstatus */}
@@ -620,12 +621,12 @@ export default function FoerderantragPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className={`text-sm font-semibold ${luecke > 0 ? 'text-destructive' : 'text-green-700 dark:text-green-400'}`}>
-                      {luecke > 0 ? 'Deckungslücke' : 'Vollständig gedeckt'}
+                      {luecke > 0 ? tx('Deckungslücke') : tx('Vollständig gedeckt')}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {luecke > 0
-                        ? `${formatCurrency(luecke)} fehlen zur vollständigen Finanzierung.`
-                        : `Die Gesamtkosten von ${formatCurrency(gesamtkosten)} sind vollständig abgedeckt.`
+                        ? tx`${formatCurrency(luecke)} fehlen zur vollständigen Finanzierung.`
+                        : tx`Die Gesamtkosten von ${formatCurrency(gesamtkosten)} sind vollständig abgedeckt.`
                       }
                     </p>
                   </div>
@@ -638,21 +639,21 @@ export default function FoerderantragPage() {
               {/* Finanzierungsstruktur */}
               {gesamtkosten > 0 && (
                 <div className="rounded-2xl border bg-card p-4 space-y-2">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Finanzierungsstruktur</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">{tx('Finanzierungsstruktur')}</p>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="flex items-center gap-2"><IconCoin size={14} className="text-primary" /> Förderbetrag</span>
+                    <span className="flex items-center gap-2"><IconCoin size={14} className="text-primary" /> {tx('Förderbetrag')}</span>
                     <span className="font-semibold">{formatCurrency(foerderbetrag)}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="flex items-center gap-2"><IconCoin size={14} className="text-muted-foreground" /> Eigenanteil</span>
+                    <span className="flex items-center gap-2"><IconCoin size={14} className="text-muted-foreground" /> {tx('Eigenanteil')}</span>
                     <span className="font-semibold">{formatCurrency(eigenanteil)}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="flex items-center gap-2"><IconCoin size={14} className="text-muted-foreground" /> Drittmittel</span>
+                    <span className="flex items-center gap-2"><IconCoin size={14} className="text-muted-foreground" /> {tx('Drittmittel')}</span>
                     <span className="font-semibold">{formatCurrency(drittmittel)}</span>
                   </div>
                   <div className="border-t pt-2 flex items-center justify-between text-sm font-semibold">
-                    <span>Gesamtkosten</span>
+                    <span>{tx('Gesamtkosten')}</span>
                     <span>{formatCurrency(gesamtkosten)}</span>
                   </div>
                 </div>
@@ -662,10 +663,10 @@ export default function FoerderantragPage() {
               <div className="flex justify-between pt-2">
                 <Button variant="outline" onClick={() => setStep(2)} className="gap-2">
                   <IconArrowLeft size={16} />
-                  Zurück
+                  {tx('Zurück')}
                 </Button>
                 <Button onClick={() => setStep(4)} disabled={!step3Valid} className="gap-2">
-                  Zur Zusammenfassung
+                  {tx('Zur Zusammenfassung')}
                   <IconArrowRight size={16} />
                 </Button>
               </div>
@@ -681,23 +682,23 @@ export default function FoerderantragPage() {
                   <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
                     <IconUser size={14} className="text-primary" />
                   </div>
-                  <SectionTitle>Antragsteller</SectionTitle>
+                  <SectionTitle>{tx('Antragsteller')}</SectionTitle>
                 </div>
                 <div className="space-y-1.5">
                   <SummaryRow
-                    label="Name"
+                    label={tx('Name')}
                     value={[
                       ANREDE_OPTIONS.find(o => o.key === form.anrede)?.label,
                       form.antragsteller_vorname,
                       form.antragsteller_nachname,
                     ].filter(Boolean).join(' ')}
                   />
-                  <SummaryRow label="Organisation" value={form.organisation} />
-                  <SummaryRow label="Rechtsform" value={RECHTSFORM_OPTIONS.find(o => o.key === form.rechtsform)?.label ?? ''} />
-                  <SummaryRow label="E-Mail" value={form.antragsteller_email} />
-                  <SummaryRow label="Telefon" value={form.antragsteller_telefon} />
+                  <SummaryRow label={tx('Organisation')} value={form.organisation} />
+                  <SummaryRow label={tx('Rechtsform')} value={RECHTSFORM_OPTIONS.find(o => o.key === form.rechtsform)?.label ?? ''} />
+                  <SummaryRow label={tx('E-Mail')} value={form.antragsteller_email} />
+                  <SummaryRow label={tx('Telefon')} value={form.antragsteller_telefon} />
                   <SummaryRow
-                    label="Adresse"
+                    label={tx('Adresse')}
                     value={[form.strasse, form.hausnummer, form.plz, form.ort].filter(Boolean).join(' ')}
                   />
                 </div>
@@ -709,26 +710,26 @@ export default function FoerderantragPage() {
                   <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
                     <IconBuildingCommunity size={14} className="text-primary" />
                   </div>
-                  <SectionTitle>Projektdetails</SectionTitle>
+                  <SectionTitle>{tx('Projektdetails')}</SectionTitle>
                 </div>
                 <div className="space-y-1.5">
-                  <SummaryRow label="Projekttitel" value={form.projekttitel} />
-                  <SummaryRow label="Förderkategorie" value={FOERDERKATEGORIE_OPTIONS.find(o => o.key === form.foerderkategorie)?.label ?? ''} />
-                  <SummaryRow label="Förderprogramm" value={form.foerderprogramm} />
-                  <SummaryRow label="Projektort" value={form.projektort} />
+                  <SummaryRow label={tx('Projekttitel')} value={form.projekttitel} />
+                  <SummaryRow label={tx('Förderkategorie')} value={FOERDERKATEGORIE_OPTIONS.find(o => o.key === form.foerderkategorie)?.label ?? ''} />
+                  <SummaryRow label={tx('Förderprogramm')} value={form.foerderprogramm} />
+                  <SummaryRow label={tx('Projektort')} value={form.projektort} />
                   <SummaryRow
-                    label="Laufzeit"
+                    label={tx('Laufzeit')}
                     value={
                       form.projektbeginn && form.projektende
                         ? `${formatDate(form.projektbeginn)} – ${formatDate(form.projektende)}`
                         : form.projektbeginn
-                        ? `Ab ${formatDate(form.projektbeginn)}`
+                        ? tx`Ab ${formatDate(form.projektbeginn)}`
                         : ''
                     }
                   />
                   {form.projektkurzbeschreibung && (
                     <div className="min-w-0">
-                      <span className="text-muted-foreground text-sm block mb-1">Kurzbeschreibung</span>
+                      <span className="text-muted-foreground text-sm block mb-1">{tx('Kurzbeschreibung')}</span>
                       <p className="text-sm text-foreground line-clamp-3">{form.projektkurzbeschreibung}</p>
                     </div>
                   )}
@@ -741,15 +742,15 @@ export default function FoerderantragPage() {
                   <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
                     <IconCoin size={14} className="text-primary" />
                   </div>
-                  <SectionTitle>Finanzierung</SectionTitle>
+                  <SectionTitle>{tx('Finanzierung')}</SectionTitle>
                 </div>
                 <div className="space-y-1.5">
-                  <SummaryRow label="Gesamtkosten" value={gesamtkosten > 0 ? formatCurrency(gesamtkosten) : ''} />
-                  <SummaryRow label="Förderbetrag" value={foerderbetrag > 0 ? formatCurrency(foerderbetrag) : ''} />
-                  <SummaryRow label="Eigenanteil" value={eigenanteil > 0 ? formatCurrency(eigenanteil) : ''} />
-                  <SummaryRow label="Drittmittel" value={drittmittel > 0 ? formatCurrency(drittmittel) : ''} />
+                  <SummaryRow label={tx('Gesamtkosten')} value={gesamtkosten > 0 ? formatCurrency(gesamtkosten) : ''} />
+                  <SummaryRow label={tx('Förderbetrag')} value={foerderbetrag > 0 ? formatCurrency(foerderbetrag) : ''} />
+                  <SummaryRow label={tx('Eigenanteil')} value={eigenanteil > 0 ? formatCurrency(eigenanteil) : ''} />
+                  <SummaryRow label={tx('Drittmittel')} value={drittmittel > 0 ? formatCurrency(drittmittel) : ''} />
                   {luecke > 0 && gesamtkosten > 0 && (
-                    <SummaryRow label="Deckungslücke" value={`${formatCurrency(luecke)} fehlen noch`} />
+                    <SummaryRow label={tx('Deckungslücke')} value={tx`${formatCurrency(luecke)} fehlen noch`} />
                   )}
                 </div>
               </div>
@@ -758,8 +759,7 @@ export default function FoerderantragPage() {
               <div className="rounded-xl border bg-muted/40 p-3 flex items-start gap-2">
                 <IconCheck size={15} className="text-muted-foreground shrink-0 mt-0.5" />
                 <p className="text-xs text-muted-foreground">
-                  Deine Daten werden ausschließlich zur Bearbeitung deines Förderantrags verwendet und nicht an Dritte weitergegeben.
-                  Der Antrag wird mit dem Status <span className="font-medium text-foreground">Eingegangen</span> angelegt.
+                  {tx('Deine Daten werden ausschließlich zur Bearbeitung deines Förderantrags verwendet und nicht an Dritte weitergegeben. Der Antrag wird mit dem Status')} <span className="font-medium text-foreground">{tx('Eingegangen')}</span> {tx('angelegt.')}
                 </p>
               </div>
 
@@ -775,15 +775,15 @@ export default function FoerderantragPage() {
               <div className="flex justify-between pt-2">
                 <Button variant="outline" onClick={() => setStep(3)} className="gap-2" disabled={submitting}>
                   <IconArrowLeft size={16} />
-                  Zurück
+                  {tx('Zurück')}
                 </Button>
                 <Button onClick={handleSubmit} disabled={submitting} className="gap-2">
                   {submitting ? (
-                    <>Wird eingereicht…</>
+                    <>{tx('Wird eingereicht…')}</>
                   ) : (
                     <>
                       <IconSend size={16} />
-                      Antrag jetzt einreichen
+                      {tx('Antrag jetzt einreichen')}
                     </>
                   )}
                 </Button>

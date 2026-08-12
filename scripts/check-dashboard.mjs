@@ -261,6 +261,122 @@ if (gridIdx >= 0) {
   }
 }
 
+// 21. Runtime i18n: the dashboard ships its UI languages with a live
+// switcher — hardcoded UI strings stay frozen in one language. Every string
+// the agent writes is tx-marked (`{tx('…')}` — the pipeline translates) or
+// comes from t()/labels from '@/i18n'. Detection is text-based: JSX text
+// nodes and localized attributes carrying ≥3 consecutive letters; tx-wrapped
+// text never matches (braces/callee break the patterns). Conscious
+// exceptions (brand names, codes) take an /* i18n-exempt */ on the line.
+{
+  const literalHits = [];
+  // The closing `<` must start a tag (`</` or `<Tag`). Without that a
+  // comparison pair reads as JSX text: `x > 0 && (a.fields.b ?? 0) < y`
+  // matched, and the fixer dutifully annotated pure logic (live-seen).
+  // The `>` must close a TAG. Without the lookbehind the `>` of an arrow
+  // function matched, so `(key: K) => (e: React.ChangeEvent<HTMLInputElement
+  // | HTMLTextAreaElement>) =>` was reported as hardcoded UI text and cost a
+  // run a gate-red plus an /* i18n-exempt */ on pure type syntax.
+  const jsxText = /(?<![=-])>[^<>{}\n]*[A-Za-zÄÖÜäöüßÀ-ž]{3,}[^<>{}\n]*<[/A-Za-z]/;
+  const attrText = /\b(?:title|placeholder|label|aria-label|alt|emptyLabel|emptyText)=(?:\{\s*)?(?:"[^"{}]*[A-Za-zÄÖÜäöüßÀ-ž]{3,}[^"{}]*"|'[^'{}]*[A-Za-zÄÖÜäöüßÀ-ž]{3,}[^'{}]*')/;
+  // Widget props take their text as object fields (dimension={{ label: 'Kosten' }},
+  // measure label, Kanban column labels) — same rule, different syntax.
+  const objText = /\b(?:title|label|name|emptyLabel|emptyText|hint|description)\s*:\s*(?:"[^"{}]*[A-Za-zÄÖÜäöüßÀ-ž]{3,}[^"{}]*"|'[^'{}]*[A-Za-zÄÖÜäöüßÀ-ž]{3,}[^'{}]*')/;
+  // A sentence computed in a helper and rendered as {subtitle} is in no
+  // JSX text, no attribute and no allowlisted prop — it stayed German
+  // while the page around it turned English. One word may be a status
+  // key the API reads back ('Aktiv'), so only whole phrases count.
+  const returnText = /\breturn\s+(?:"(?=[^"]*[A-Za-zÄÖÜäöüßÀ-ž]{3,})(?=[^"]*\s)[^"{}]*"|'(?=[^']*[A-Za-zÄÖÜäöüßÀ-ž]{3,})(?=[^']*\s)[^'{}]*')/;
+  // The makeT({de:{…}, en:{…}}) table IS the translation definition — its own
+  // entries are the fix, not the defect. `title:` sits in the allowlist above,
+  // so the bundle reported itself and the fixer stamped /* i18n-exempt */ on
+  // the very table the rule demands (live-seen: two hits, plus six LookupValue
+  // pairs below, in one run — 8 of 10 findings were the gate's own noise).
+  // Brace-counted with string skipping: a value like 'Ausleihe(n) überfällig'
+  // carries parens, and a lone quote must not derail the scan.
+  const i18nDefLines = new Set();
+  {
+    const openRe = /\bmakeT\s*\(/g;
+    let m;
+    while ((m = openRe.exec(src)) !== null) {
+      let depth = 0, quote = null, i = m.index + m[0].length - 1;
+      for (; i < src.length; i++) {
+        const c = src[i];
+        if (quote) { if (c === '\\') i++; else if (c === quote) quote = null; continue; }
+        if (c === "'" || c === '"' || c === '`') { quote = c; continue; }
+        if (c === '(') depth++;
+        else if (c === ')' && --depth === 0) break;
+      }
+      const from = src.slice(0, m.index).split('\n').length - 1;
+      const to = src.slice(0, Math.min(i + 1, src.length)).split('\n').length - 1;
+      for (let n = from; n <= to; n++) i18nDefLines.add(n);
+      openRe.lastIndex = i;
+    }
+  }
+  // `{ key: …, label: 'Verfügbar' }` is a LookupValue — the API's own key/label
+  // pair mirrored into optimistic state, not UI text. The label is whatever the
+  // record already carries; rewriting it through lookupLabel() changes nothing
+  // a user sees. MASKED, not line-skipped: one line may hold both a LookupValue
+  // and real UI text, and dropping the whole line would hide the latter.
+  const lookupPair = /\{\s*key\s*:\s*[^,{}]+,\s*label\s*:\s*(?:'[^'\n]*'|"[^"\n]*")\s*\}/g;
+  for (let i = 0; i < dashLines.length; i++) {
+    const raw = dashLines[i];
+    if (raw.includes('i18n-exempt')) continue;
+    if (i18nDefLines.has(i)) continue;
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*')) continue;
+    const l = raw.replace(lookupPair, '{}');
+    if (jsxText.test(l) || attrText.test(l) || objText.test(l) || returnText.test(l)) literalHits.push(`    line ${i + 1}: ${raw}`);
+  }
+  // WARNING, not error — deliberately. Reporting these as errors bought a
+  // 30-60s agent repair loop per build, while the backend's i18n finalize
+  // step (scripts/i18n-tx.mjs wrap + one translation call) marks leftovers
+  // mechanically after the agent finishes — including template literals
+  // these regexes never saw. The agent still writes tx-first (skeleton,
+  // SKILL, prompt all teach it); whatever slips through is pipeline input,
+  // not the agent's problem.
+  if (literalHits.length) {
+    warnings.push(
+      'Unmarked UI text (tx-wrapped mechanically after the build — no action needed):' +
+      '\n' + literalHits.slice(0, 10).join('\n')
+    );
+  }
+}
+
+// 22. LOOKUP_OPTIONS labels resolve the CURRENT locale via getters — a
+// module-scope derivation that touches `.label` (e.g.
+// `const COLS = LOOKUP_OPTIONS.x.status.map(o => ({key: o.key, label: o.label}))`)
+// evaluates ONCE at import and freezes that language forever (live-proven:
+// Czech dashboard with English kanban columns). Storing the raw arrays is
+// fine — only resolving labels at module scope is not.
+{
+  // Statement-based, not line-based: the first live escape was a multi-line
+  // `.map(` with `label:` on the next line. Also resolves an import alias.
+  let optName = 'LOOKUP_OPTIONS';
+  const importM = src.match(/import\s*\{([^}]*)\}\s*from\s*'@\/types\/app'/);
+  const aliasM = importM && importM[1].match(/LOOKUP_OPTIONS\s+as\s+(\w+)/);
+  if (aliasM) optName = aliasM[1];
+  const hoisted = [];
+  for (let i = 0; i < dashLines.length; i++) {
+    if (!/^(?:export\s+)?const\s/.test(dashLines[i])) continue;
+    let j = i;
+    let stmt = dashLines[i];
+    while (!/;\s*$/.test(dashLines[j]) && j + 1 < dashLines.length && j - i < 12) {
+      j++;
+      stmt += '\n' + dashLines[j];
+    }
+    if (stmt.includes(optName) && /(?:\.label\b|label\s*:)/.test(stmt)) {
+      hoisted.push(`    line ${i + 1}: ${dashLines[i]}`);
+    }
+    i = j;
+  }
+  if (hoisted.length) {
+    errors.push(
+      'Module-scope LOOKUP_OPTIONS label read — the labels are locale-aware getters and freeze in whatever language is active at import. Move THIS derivation unchanged into the component body; a plain const or useMemo there is enough. Do NOT split it into a keys-only module const plus a second lookup in the body — a live run took that path, then had to delete the now-unused const again (three edits for a one-edit move).\n' + hoisted.join('\n')
+    );
+  }
+}
+
 for (const w of warnings) console.log(`WARN: ${w}`);
 if (errors.length > 0) {
   for (const e of errors) console.error(`ERROR: ${e}`);

@@ -14,7 +14,7 @@
  *   </custom:intent-imports>
  *   …
  *   <custom:intents>
- *   { path: '/intents/neue-buchung', label: 'Neue Buchung', icon: IconCalendarPlus, description: 'Buchung in 3 Schritten anlegen' },
+ *   { path: '/intents/neue-buchung', label: { de: 'Neue Buchung', en: 'New booking' }, icon: IconCalendarPlus, description: { de: 'Buchung in 3 Schritten anlegen', en: 'Create a booking in 3 steps' } },
  *   </custom:intents>
  */
 import type { ComponentType } from 'react';
@@ -26,17 +26,24 @@ import { IconFilePlus } from '@tabler/icons-react';
 export interface IntentLink {
   /** Route path as wired in App.tsx (HashRouter), e.g. '/intents/neue-buchung'. */
   path: string;
-  /** Short label shown in the sidebar (German, 1–3 words). */
-  label: string;
+  /**
+   * Short sidebar label (1–3 words). Preferred: both UI languages
+   * ({ de, en } — the runtime switcher picks the active one; cs stays
+   * readable for legacy entries). A plain string stays valid and renders as-is.
+   */
+  label: string | { de?: string; en?: string; cs?: string };
   /** Tabler icon COMPONENT reference (not rendered JSX), e.g. IconCalendarPlus. */
   icon?: ComponentType<{ size?: number | string; className?: string; stroke?: number | string }>;
-  /** One-line purpose — shown as tooltip. */
-  description?: string;
+  /**
+   * One-line purpose. Same shape as `label`: prefer both UI languages so a
+   * language switch reaches it; a plain string stays valid.
+   */
+  description?: string | { de?: string; en?: string; cs?: string };
 }
 
 export const INTENTS: IntentLink[] = [
   // <custom:intents>
-  { path: '/intents/antrag-einreichen', label: 'Antrag einreichen', icon: IconFilePlus, description: 'Neuen Förderantrag in 4 Schritten einreichen' },
+  { path: '/intents/antrag-einreichen', label: { de: 'Antrag einreichen', en: 'Submit Application' }, icon: IconFilePlus, description: { de: 'Neuen Förderantrag in 4 Schritten einreichen', en: 'Submit a New Grant Application in 4 Steps' } },
   // </custom:intents>
 ];
 

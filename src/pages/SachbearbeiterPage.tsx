@@ -14,6 +14,7 @@ import { SachbearbeiterDialog } from '@/components/dialogs/SachbearbeiterDialog'
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { PageShell } from '@/components/PageShell';
 import { AI_PHOTO_SCAN, AI_PHOTO_LOCATION } from '@/config/ai-features';
+import { t, appLabel, fieldLabel, lookupLabel } from '@/i18n';
 
 export default function SachbearbeiterPage() {
   const navigate = useNavigate();
@@ -99,18 +100,18 @@ export default function SachbearbeiterPage() {
 
   return (
     <PageShell
-      title="Sachbearbeiter"
-      subtitle={`${records.length} Sachbearbeiter im System`}
+      title={appLabel('sachbearbeiter')}
+      subtitle={`${records.length} ${t('in_system', { entity: appLabel('sachbearbeiter') })}`}
       action={
         <Button onClick={() => setDialogOpen(true)} className="shrink-0 rounded-full shadow-sm">
-          <IconPlus className="h-4 w-4 mr-2" /> Hinzufügen
+          <IconPlus className="h-4 w-4 mr-2" /> {t('add')}
         </Button>
       }
     >
       <div className="relative w-full max-w-sm">
         <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Sachbearbeiter suchen..."
+          placeholder={t('search_entity', { entity: appLabel('sachbearbeiter') })}
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="pl-9"
@@ -122,41 +123,41 @@ export default function SachbearbeiterPage() {
             <TableRow className="border-b border-input">
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('vorname')}>
                 <span className="inline-flex items-center gap-1">
-                  Vorname
+                  {fieldLabel('sachbearbeiter', 'vorname')}
                   {sortKey === 'vorname' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('nachname')}>
                 <span className="inline-flex items-center gap-1">
-                  Nachname
+                  {fieldLabel('sachbearbeiter', 'nachname')}
                   {sortKey === 'nachname' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('email')}>
                 <span className="inline-flex items-center gap-1">
-                  E-Mail-Adresse
+                  {fieldLabel('sachbearbeiter', 'email')}
                   {sortKey === 'email' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('telefon')}>
                 <span className="inline-flex items-center gap-1">
-                  Telefonnummer
+                  {fieldLabel('sachbearbeiter', 'telefon')}
                   {sortKey === 'telefon' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('abteilung')}>
                 <span className="inline-flex items-center gap-1">
-                  Abteilung
+                  {fieldLabel('sachbearbeiter', 'abteilung')}
                   {sortKey === 'abteilung' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('funktion')}>
                 <span className="inline-flex items-center gap-1">
-                  Funktion / Rolle
+                  {fieldLabel('sachbearbeiter', 'funktion')}
                   {sortKey === 'funktion' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
-              <TableHead className="w-24 uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6">Aktionen</TableHead>
+              <TableHead className="w-24 uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6">{t('actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -183,7 +184,7 @@ export default function SachbearbeiterPage() {
             {filtered.length === 0 && (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-16 text-muted-foreground">
-                  {search ? 'Keine Ergebnisse gefunden.' : 'Noch keine Sachbearbeiter. Jetzt hinzufügen!'}
+                  {search ? t('no_results') : t('no_data_yet', { entity: appLabel('sachbearbeiter') })}
                 </TableCell>
               </TableRow>
             )}
@@ -205,8 +206,8 @@ export default function SachbearbeiterPage() {
         open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDelete}
-        title="Sachbearbeiter löschen"
-        description="Soll dieser Eintrag wirklich gelöscht werden? Diese Aktion kann nicht rückgängig gemacht werden."
+        title={t('delete_entity', { entity: appLabel('sachbearbeiter') })}
+        description={t('confirm_delete_desc')}
       />
 
     </PageShell>

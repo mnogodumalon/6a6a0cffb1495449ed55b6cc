@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { IconWorld, IconCheck, IconLink } from '@tabler/icons-react';
 import { loadPublicPagesConfig } from '@/lib/publicClient';
+import { t } from '@/i18n';
 
 /**
  * PublicPagesNav — sidebar section for the dashboard's public pages.
@@ -14,11 +15,11 @@ import { loadPublicPagesConfig } from '@/lib/publicClient';
  * Rows open the public page in a new tab (it renders outside the dashboard
  * layout) and offer one-click copy of the shareable link. Anonymous visitors
  * never see this — the sidebar only exists inside the authenticated Layout.
- * No pages → renders nothing.
+ *
+ * The whole section stays hidden until the dashboard actually HAS a public
+ * page — published or waiting to be published. A dashboard that never asked
+ * for one shows no trace of the feature.
  */
-const HEADING = 'Öffentliche Seiten';
-const COPY_LABEL = 'Link kopieren';
-const MANAGE_LABEL = 'Verwalten';
 
 interface NavEntry {
   slug: string;
@@ -28,10 +29,11 @@ interface NavEntry {
 
 export function PublicPagesNav({ onNavigate }: { onNavigate?: () => void }) {
   const [entries, setEntries] = useState<NavEntry[]>([]);
-  // null = config not present (old dashboard / feature untouched) → hide the
-  // whole section. Once the runtime config exists (any build with public
-  // pages ran), show the section + the Verwalten link even with zero
-  // published pages, so the owner can discover and publish drafts.
+  // Show the section only when there is something to show or to publish.
+  // `pages` holds published pages only, so a draft is invisible there — the
+  // artifact carries `unpublished_count` for exactly this decision. The mere
+  // existence of the config is NOT enough: it is written for every dashboard,
+  // so keying on it put an empty section into every sidebar.
   const [available, setAvailable] = useState(false);
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
 
@@ -40,7 +42,8 @@ export function PublicPagesNav({ onNavigate }: { onNavigate?: () => void }) {
     (async () => {
       const cfg = await loadPublicPagesConfig();
       if (cancelled || !cfg) return;
-      setAvailable(true);
+      const published = Object.keys(cfg.pages).length;
+      setAvailable(published > 0 || (cfg.unpublished_count ?? 0) > 0);
       const base = window.location.href.split('#')[0];
       setEntries(
         Object.entries(cfg.pages).map(([slug, page]) => ({
@@ -69,17 +72,17 @@ export function PublicPagesNav({ onNavigate }: { onNavigate?: () => void }) {
   };
 
   return (
-    <nav className="px-3 pt-4" aria-label={HEADING}>
+    <nav className="px-3 pt-4" aria-label={t('ppn_heading')}>
       <div className="flex items-center justify-between px-4 pb-1">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50">
-          {HEADING}
+          {t('ppn_heading')}
         </p>
         <NavLink
           to="verwaltung/oeffentliche-seiten"
           onClick={onNavigate}
           className="text-[11px] font-medium text-sidebar-foreground/50 hover:text-sidebar-accent-foreground transition-colors"
         >
-          {MANAGE_LABEL}
+          {t('ppn_manage_label')}
         </NavLink>
       </div>
       <div className="space-y-0.5">
@@ -96,8 +99,8 @@ export function PublicPagesNav({ onNavigate }: { onNavigate?: () => void }) {
             </a>
             <button
               type="button"
-              title={COPY_LABEL}
-              aria-label={COPY_LABEL}
+              title={t('ppn_copy_label')}
+              aria-label={t('ppn_copy_label')}
               onClick={() => copy(entry)}
               className="shrink-0 p-2 mr-1 rounded-xl text-sidebar-foreground/60 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
             >

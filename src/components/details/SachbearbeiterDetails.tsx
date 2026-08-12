@@ -4,6 +4,7 @@ import { extractRecordId } from '@/services/livingAppsService';
 import {
   RecordSection, RecordField, RecordRelation, RecordAttachments,
 } from '@/components/widgets/RecordView';
+import { t, appLabel, fieldLabel } from '@/i18n';
 import { SatelliteSection } from '@/components/SatelliteSection';
 
 export interface SachbearbeiterDetailsProps {
@@ -25,19 +26,19 @@ export function SachbearbeiterDetails({
 }: SachbearbeiterDetailsProps) {
   return (
     <>
-      <RecordSection title="Details" cols={2}>
-        <RecordField label="Vorname" value={record.fields.vorname} format="text" />
-        <RecordField label="Nachname" value={record.fields.nachname} format="text" />
-        <RecordField label="E-Mail-Adresse" value={record.fields.email} format="email" />
-        <RecordField label="Telefonnummer" value={record.fields.telefon} format="text" />
-        <RecordField label="Abteilung" value={record.fields.abteilung} format="text" />
-        <RecordField label="Funktion / Rolle" value={record.fields.funktion} format="text" />
+      <RecordSection title={t('details')} cols={2}>
+        <RecordField label={fieldLabel('sachbearbeiter', 'vorname')} value={record.fields.vorname} format="text" />
+        <RecordField label={fieldLabel('sachbearbeiter', 'nachname')} value={record.fields.nachname} format="text" />
+        <RecordField label={fieldLabel('sachbearbeiter', 'email')} value={record.fields.email} format="email" />
+        <RecordField label={fieldLabel('sachbearbeiter', 'telefon')} value={record.fields.telefon} format="text" />
+        <RecordField label={fieldLabel('sachbearbeiter', 'abteilung')} value={record.fields.abteilung} format="text" />
+        <RecordField label={fieldLabel('sachbearbeiter', 'funktion')} value={record.fields.funktion} format="text" />
       </RecordSection>
 
       <SatelliteSection
-        title="Förderanträge"
+        title={appLabel('foerderantraege')}
         items={foerderantraegeList.filter(r => extractRecordId(r.fields.bearbeiter) === record.record_id)}
-        map={r => ({ name: r.fields.antragsteller_vorname ?? 'Förderanträge', meta: r.fields.projektbeginn })}
+        map={r => ({ name: r.fields.antragsteller_vorname ?? appLabel('foerderantraege'), meta: r.fields.projektbeginn })}
         onOpen={onOpenFoerderantraege}
         onAdd={onAddFoerderantraege}
         getKey={r => r.record_id}

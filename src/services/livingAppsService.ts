@@ -75,8 +75,9 @@ export interface CallApiOptions {
   silent?: boolean;
 }
 
-/** What create / update resolve to. Same `record_id` the read helpers
- *  expose, so the whole family behaves alike — the raw REST answer only
+/** What the create and update helpers resolve to. Same `record_id`
+ *  the read helpers expose, so the whole family behaves alike — the
+ *  raw REST answer only
  *  carries `id`, and code that guessed (e.g. Object.keys(res)[0]) built
  *  `/records/id` and got a 400 on the next write. */
 export interface MutationResult {
@@ -330,13 +331,14 @@ export class LivingAppsService {
   static async getSachbearbeiter(): Promise<Sachbearbeiter[]> {
     const data = await callApi('GET', `/apps/${APP_IDS.SACHBEARBEITER}/records`);
     const records = Object.entries(data).map(([id, rec]: [string, any]) => ({
-      record_id: id, ...rec
+      record_id: id, ...rec,
+      createdat: rec.created_at ?? '', updatedat: rec.updated_at ?? null,
     })) as Sachbearbeiter[];
     return enrichLookupFields(records, 'sachbearbeiter');
   }
   static async getSachbearbeiterEntry(id: string): Promise<Sachbearbeiter | undefined> {
     const data = await callApi('GET', `/apps/${APP_IDS.SACHBEARBEITER}/records/${id}`);
-    const record = { record_id: data.id, ...data } as Sachbearbeiter;
+    const record = { record_id: data.id, ...data, createdat: data.created_at ?? '', updatedat: data.updated_at ?? null } as Sachbearbeiter;
     return enrichLookupFields([record], 'sachbearbeiter')[0];
   }
   static async createSachbearbeiterEntry(fields: CreateSachbearbeiter): Promise<MutationResult> {
@@ -355,13 +357,14 @@ export class LivingAppsService {
   static async getFoerderantraege(): Promise<Foerderantraege[]> {
     const data = await callApi('GET', `/apps/${APP_IDS.FOERDERANTRAEGE}/records`);
     const records = Object.entries(data).map(([id, rec]: [string, any]) => ({
-      record_id: id, ...rec
+      record_id: id, ...rec,
+      createdat: rec.created_at ?? '', updatedat: rec.updated_at ?? null,
     })) as Foerderantraege[];
     return enrichLookupFields(records, 'foerderantraege');
   }
   static async getFoerderantraegeEntry(id: string): Promise<Foerderantraege | undefined> {
     const data = await callApi('GET', `/apps/${APP_IDS.FOERDERANTRAEGE}/records/${id}`);
-    const record = { record_id: data.id, ...data } as Foerderantraege;
+    const record = { record_id: data.id, ...data, createdat: data.created_at ?? '', updatedat: data.updated_at ?? null } as Foerderantraege;
     return enrichLookupFields([record], 'foerderantraege')[0];
   }
   static async createFoerderantraegeEntry(fields: CreateFoerderantraege): Promise<MutationResult> {

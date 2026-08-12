@@ -1,6 +1,7 @@
 import { Component, type ReactNode, type ErrorInfo } from 'react';
 import * as Sentry from '@sentry/react';
 import { IconAlertTriangle, IconRefresh, IconTool, IconCheck } from '@tabler/icons-react';
+import { t } from '@/i18n';
 
 const APPGROUP_ID = '6a6a0cffb1495449ed55b6cc';
 const REPAIR_ENDPOINT = '/claude/build/repair';
@@ -39,7 +40,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
   }
 
   handleRepair = async () => {
-    this.setState({ repairing: true, repairStatus: 'Reparatur wird gestartet...', repairFailed: false });
+    this.setState({ repairing: true, repairStatus: t('repair_starting'), repairFailed: false });
 
     const errorContext = JSON.stringify({
       type: 'render_crash',
@@ -102,7 +103,11 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
     const { repairing, repairDone, repairFailed, repairStatus } = this.state;
 
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4 p-8">
+      // data-testid: the ONLY reliable signal that a page died. A caught error
+      // never reaches Playwright's `pageerror`, so an automated render check
+      // has to look for this node in the DOM — React #310 took a whole
+      // dashboard down while the build stayed green.
+      <div data-testid="error-boundary-fallback" className="flex flex-col items-center justify-center min-h-screen gap-4 p-8">
         <div className="w-12 h-12 rounded-2xl bg-destructive/10 flex items-center justify-center">
           {repairDone
             ? <IconCheck size={22} className="text-green-500" />
@@ -110,11 +115,11 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
         </div>
         <div className="text-center">
           <h3 className="font-semibold text-foreground mb-1">
-            {repairDone ? 'Dashboard repariert' : 'Etwas ist schiefgelaufen'}
+            {repairDone ? t('repair_done_title') : t('repair_error_title')}
           </h3>
           <p className="text-sm text-muted-foreground max-w-md">
             {repairDone
-              ? 'Das Problem wurde behoben. Bitte laden Sie die Seite neu.'
+              ? t('repair_done_desc')
               : repairing
                 ? repairStatus
                 : this.state.error?.message}
@@ -127,7 +132,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
               className="inline-flex items-center gap-1.5 rounded-lg bg-primary text-primary-foreground px-3 py-1.5 text-sm font-medium hover:bg-primary/90 transition-colors"
             >
               <IconRefresh size={14} />
-              Neu laden
+              {t('repair_reload')}
             </button>
           ) : (
             <>
@@ -136,7 +141,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
                 className="inline-flex items-center gap-1.5 rounded-lg border border-input bg-background px-3 py-1.5 text-sm font-medium hover:bg-accent transition-colors"
               >
                 <IconRefresh size={14} />
-                Neu laden
+                {t('repair_reload')}
               </button>
               <button
                 onClick={this.handleRepair}
@@ -146,13 +151,13 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
                 {repairing
                   ? <span className="inline-block w-3.5 h-3.5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                   : <IconTool size={14} />}
-                {repairing ? 'Reparatur läuft...' : 'Dashboard reparieren'}
+                {repairing ? t('repair_running') : t('repair_text')}
               </button>
             </>
           )}
         </div>
         {repairFailed && !repairDone && (
-          <p className="text-sm text-destructive">Automatische Reparatur fehlgeschlagen. Bitte kontaktieren Sie den Support.</p>
+          <p className="text-sm text-destructive">{t('repair_failed')}</p>
         )}
       </div>
     );

@@ -27,6 +27,7 @@ import {
   IconCoin,
   IconAlertTriangle,
 } from '@tabler/icons-react';
+import { tx } from '@/i18n';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -71,7 +72,38 @@ interface FormData {
 
 const TODAY = new Date().toISOString().split('T')[0];
 
-const INITIAL_FORM: FormData = {
+// ─── Helper ───────────────────────────────────────────────────────────────────
+
+function parseNum(v: string): number | undefined {
+  const n = parseFloat(v.replace(',', '.'));
+  return isNaN(n) ? undefined : n;
+}
+
+function SummaryRow({ label, value }: { label: string; value: string }) {
+  if (!value) return null;
+  return (
+    <div className="flex gap-3 min-w-0">
+      <span className="text-muted-foreground text-sm shrink-0 w-44">{label}</span>
+      <span className="text-sm font-medium text-foreground truncate">{value}</span>
+    </div>
+  );
+}
+
+function SectionTitle({ children }: { children: ReactNode }) {
+  return <h3 className="text-base font-semibold text-foreground mt-6 mb-3 first:mt-0">{children}</h3>;
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+
+export default function AntragEinreichenPage() {
+  const WIZARD_STEPS = [
+  { label: tx('Antragsteller') },
+  { label: tx('Projektdetails') },
+  { label: tx('Finanzierung') },
+  { label: tx('Einreichen') },
+];
+
+  const INITIAL_FORM: FormData = {
   anrede: '',
   antragsteller_vorname: '',
   antragsteller_nachname: '',
@@ -106,37 +138,6 @@ const INITIAL_FORM: FormData = {
   bearbeitungsnotizen: '',
 };
 
-const WIZARD_STEPS = [
-  { label: 'Antragsteller' },
-  { label: 'Projektdetails' },
-  { label: 'Finanzierung' },
-  { label: 'Einreichen' },
-];
-
-// ─── Helper ───────────────────────────────────────────────────────────────────
-
-function parseNum(v: string): number | undefined {
-  const n = parseFloat(v.replace(',', '.'));
-  return isNaN(n) ? undefined : n;
-}
-
-function SummaryRow({ label, value }: { label: string; value: string }) {
-  if (!value) return null;
-  return (
-    <div className="flex gap-3 min-w-0">
-      <span className="text-muted-foreground text-sm shrink-0 w-44">{label}</span>
-      <span className="text-sm font-medium text-foreground truncate">{value}</span>
-    </div>
-  );
-}
-
-function SectionTitle({ children }: { children: ReactNode }) {
-  return <h3 className="text-base font-semibold text-foreground mt-6 mb-3 first:mt-0">{children}</h3>;
-}
-
-// ─── Main Component ───────────────────────────────────────────────────────────
-
-export default function AntragEinreichenPage() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
@@ -217,7 +218,7 @@ export default function AntragEinreichenPage() {
       });
       setSuccessId(result.record_id);
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : 'Unbekannter Fehler beim Einreichen.');
+      setSubmitError(err instanceof Error ? err.message : tx('Unbekannter Fehler beim Einreichen.'));
     } finally {
       setSubmitting(false);
     }
@@ -236,26 +237,26 @@ export default function AntragEinreichenPage() {
       <div className="max-w-4xl mx-auto space-y-6">
         <a href="#/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <IconArrowLeft size={14} className="shrink-0" />
-          Zurück zum Dashboard
+          {tx('Zurück zum Dashboard')}
         </a>
         <div className="flex flex-col items-center justify-center py-20 gap-6">
           <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
             <IconCheck size={32} className="text-primary" stroke={2.5} />
           </div>
           <div className="text-center space-y-2">
-            <h2 className="text-2xl font-bold tracking-tight">Antrag erfolgreich eingereicht!</h2>
+            <h2 className="text-2xl font-bold tracking-tight">{tx('Antrag erfolgreich eingereicht!')}</h2>
             <p className="text-muted-foreground max-w-sm">
-              Dein Förderantrag wurde gespeichert. Die Vorgangsnummer lautet:
+              {tx('Dein Förderantrag wurde gespeichert. Die Vorgangsnummer lautet:')}
             </p>
             <p className="font-mono text-sm bg-muted rounded-lg px-3 py-2 inline-block">{successId}</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 mt-2">
             <Button onClick={handleReset} variant="default">
-              Weiteren Antrag einreichen
+              {tx('Weiteren Antrag einreichen')}
             </Button>
             <a href="#/">
               <Button variant="outline" className="w-full sm:w-auto">
-                Zurück zum Dashboard
+                {tx('Zurück zum Dashboard')}
               </Button>
             </a>
           </div>
@@ -267,8 +268,8 @@ export default function AntragEinreichenPage() {
   // ─── Wizard ───────────────────────────────────────────────────────────────────
   return (
     <IntentWizardShell
-      title="Förderantrag einreichen"
-      subtitle="Fülle alle Schritte aus, um einen neuen Antrag zu stellen."
+      title={tx('Förderantrag einreichen')}
+      subtitle={tx('Fülle alle Schritte aus, um einen neuen Antrag zu stellen.')}
       steps={WIZARD_STEPS}
       currentStep={step}
       onStepChange={setStep}
@@ -279,7 +280,7 @@ export default function AntragEinreichenPage() {
         <div className="space-y-6">
           {/* Anrede Tile Buttons */}
           <div className="space-y-2">
-            <Label>Anrede</Label>
+            <Label>{tx('Anrede')}</Label>
             <div className="flex flex-wrap gap-2">
               {anredeOptions.map(opt => (
                 <button
@@ -301,26 +302,26 @@ export default function AntragEinreichenPage() {
           {/* Name */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="vorname">Vorname <span className="text-destructive">*</span></Label>
-              <Input id="vorname" value={form.antragsteller_vorname} onChange={set('antragsteller_vorname')} placeholder="Max" />
+              <Label htmlFor="vorname">{tx('Vorname')} <span className="text-destructive">*</span></Label>
+              <Input id="vorname" value={form.antragsteller_vorname} onChange={set('antragsteller_vorname')} placeholder={tx('Max')} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="nachname">Nachname <span className="text-destructive">*</span></Label>
-              <Input id="nachname" value={form.antragsteller_nachname} onChange={set('antragsteller_nachname')} placeholder="Mustermann" />
+              <Label htmlFor="nachname">{tx('Nachname')} <span className="text-destructive">*</span></Label>
+              <Input id="nachname" value={form.antragsteller_nachname} onChange={set('antragsteller_nachname')} placeholder={tx('Mustermann')} />
             </div>
           </div>
 
           {/* Organisation & Rechtsform */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="organisation">Organisation</Label>
-              <Input id="organisation" value={form.organisation} onChange={set('organisation')} placeholder="Muster e.V." />
+              <Label htmlFor="organisation">{tx('Organisation')}</Label>
+              <Input id="organisation" value={form.organisation} onChange={set('organisation')} placeholder={tx('Muster e.V.')} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="rechtsform">Rechtsform</Label>
+              <Label htmlFor="rechtsform">{tx('Rechtsform')}</Label>
               <Select value={form.rechtsform} onValueChange={setVal('rechtsform')}>
                 <SelectTrigger id="rechtsform">
-                  <SelectValue placeholder="Bitte wählen..." />
+                  <SelectValue placeholder={tx('Bitte wählen...')} />
                 </SelectTrigger>
                 <SelectContent>
                   {rechtsformOptions.map(opt => (
@@ -334,43 +335,43 @@ export default function AntragEinreichenPage() {
           {/* Kontaktdaten */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="email">E-Mail <span className="text-destructive">*</span></Label>
-              <Input id="email" type="email" value={form.antragsteller_email} onChange={set('antragsteller_email')} placeholder="max@example.de" />
+              <Label htmlFor="email">{tx('E-Mail')} <span className="text-destructive">*</span></Label>
+              <Input id="email" type="email" value={form.antragsteller_email} onChange={set('antragsteller_email')} placeholder={tx('max@example.de')} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="telefon">Telefon</Label>
+              <Label htmlFor="telefon">{tx('Telefon')}</Label>
               <Input id="telefon" type="tel" value={form.antragsteller_telefon} onChange={set('antragsteller_telefon')} placeholder="+49 123 456789" />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="website">Website (optional)</Label>
-            <Input id="website" type="url" value={form.antragsteller_website} onChange={set('antragsteller_website')} placeholder="https://www.example.de" />
+            <Label htmlFor="website">{tx('Website (optional)')}</Label>
+            <Input id="website" type="url" value={form.antragsteller_website} onChange={set('antragsteller_website')} placeholder={tx('https://www.example.de')} />
           </div>
 
           {/* Adresse */}
           <div>
-            <p className="text-sm font-medium text-foreground mb-3">Anschrift</p>
+            <p className="text-sm font-medium text-foreground mb-3">{tx('Anschrift')}</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="sm:col-span-2 space-y-1.5">
-                <Label htmlFor="strasse">Straße</Label>
-                <Input id="strasse" value={form.strasse} onChange={set('strasse')} placeholder="Musterstraße" />
+                <Label htmlFor="strasse">{tx('Straße')}</Label>
+                <Input id="strasse" value={form.strasse} onChange={set('strasse')} placeholder={tx('Musterstraße')} />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="hausnummer">Hausnummer</Label>
+                <Label htmlFor="hausnummer">{tx('Hausnummer')}</Label>
                 <Input id="hausnummer" value={form.hausnummer} onChange={set('hausnummer')} placeholder="12a" />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="plz">PLZ</Label>
+                <Label htmlFor="plz">{tx('PLZ')}</Label>
                 <Input id="plz" value={form.plz} onChange={set('plz')} placeholder="12345" />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="ort">Ort</Label>
-                <Input id="ort" value={form.ort} onChange={set('ort')} placeholder="Berlin" />
+                <Label htmlFor="ort">{tx('Ort')}</Label>
+                <Input id="ort" value={form.ort} onChange={set('ort')} placeholder={tx('Berlin')} />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="land">Land</Label>
-                <Input id="land" value={form.land} onChange={set('land')} placeholder="Deutschland" />
+                <Label htmlFor="land">{tx('Land')}</Label>
+                <Input id="land" value={form.land} onChange={set('land')} placeholder={tx('Deutschland')} />
               </div>
             </div>
           </div>
@@ -382,7 +383,7 @@ export default function AntragEinreichenPage() {
                 <IconUser size={16} className="text-primary" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs text-muted-foreground mb-0.5">Antragsteller</p>
+                <p className="text-xs text-muted-foreground mb-0.5">{tx('Antragsteller')}</p>
                 <p className="font-semibold text-sm truncate">
                   {[form.antragsteller_vorname, form.antragsteller_nachname].filter(Boolean).join(' ') || '—'}
                 </p>
@@ -400,7 +401,7 @@ export default function AntragEinreichenPage() {
               disabled={!step1Valid}
               className="gap-2"
             >
-              Weiter zu Projektdetails
+              {tx('Weiter zu Projektdetails')}
               <IconArrowRight size={16} />
             </Button>
           </div>
@@ -411,17 +412,17 @@ export default function AntragEinreichenPage() {
       {step === 2 && (
         <div className="space-y-5">
           <div className="space-y-1.5">
-            <Label htmlFor="projekttitel">Projekttitel <span className="text-destructive">*</span></Label>
-            <Input id="projekttitel" value={form.projekttitel} onChange={set('projekttitel')} placeholder="Name deines Projekts" />
+            <Label htmlFor="projekttitel">{tx('Projekttitel')} <span className="text-destructive">*</span></Label>
+            <Input id="projekttitel" value={form.projekttitel} onChange={set('projekttitel')} placeholder={tx('Name deines Projekts')} />
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="projektkurzbeschreibung">Kurzbeschreibung</Label>
+            <Label htmlFor="projektkurzbeschreibung">{tx('Kurzbeschreibung')}</Label>
             <Textarea
               id="projektkurzbeschreibung"
               value={form.projektkurzbeschreibung}
               onChange={set('projektkurzbeschreibung')}
-              placeholder="Beschreibe dein Projekt in 2–3 Sätzen..."
+              placeholder={tx('Beschreibe dein Projekt in 2–3 Sätzen...')}
               rows={3}
             />
           </div>
@@ -429,29 +430,29 @@ export default function AntragEinreichenPage() {
           {/* Laufzeit */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="projektbeginn">Projektbeginn</Label>
+              <Label htmlFor="projektbeginn">{tx('Projektbeginn')}</Label>
               <Input id="projektbeginn" type="date" value={form.projektbeginn} onChange={set('projektbeginn')} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="projektende">Projektende</Label>
+              <Label htmlFor="projektende">{tx('Projektende')}</Label>
               <Input id="projektende" type="date" value={form.projektende} onChange={set('projektende')} />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="projektort">Projektort</Label>
-              <Input id="projektort" value={form.projektort} onChange={set('projektort')} placeholder="Berlin" />
+              <Label htmlFor="projektort">{tx('Projektort')}</Label>
+              <Input id="projektort" value={form.projektort} onChange={set('projektort')} placeholder={tx('Berlin')} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="foerderprogramm">Förderprogramm</Label>
-              <Input id="foerderprogramm" value={form.foerderprogramm} onChange={set('foerderprogramm')} placeholder="z.B. Bundesförderung XY" />
+              <Label htmlFor="foerderprogramm">{tx('Förderprogramm')}</Label>
+              <Input id="foerderprogramm" value={form.foerderprogramm} onChange={set('foerderprogramm')} placeholder={tx('z.B. Bundesförderung XY')} />
             </div>
           </div>
 
           {/* Förderkategorie Tiles */}
           <div className="space-y-2">
-            <Label>Förderkategorie</Label>
+            <Label>{tx('Förderkategorie')}</Label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {foerderkategorieOptions.map(opt => (
                 <button
@@ -471,28 +472,28 @@ export default function AntragEinreichenPage() {
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="projektziele">Projektziele</Label>
-            <Textarea id="projektziele" value={form.projektziele} onChange={set('projektziele')} placeholder="Was soll das Projekt erreichen?" rows={3} />
+            <Label htmlFor="projektziele">{tx('Projektziele')}</Label>
+            <Textarea id="projektziele" value={form.projektziele} onChange={set('projektziele')} placeholder={tx('Was soll das Projekt erreichen?')} rows={3} />
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="zielgruppe">Zielgruppe</Label>
-            <Textarea id="zielgruppe" value={form.zielgruppe} onChange={set('zielgruppe')} placeholder="Wen soll das Projekt ansprechen?" rows={2} />
+            <Label htmlFor="zielgruppe">{tx('Zielgruppe')}</Label>
+            <Textarea id="zielgruppe" value={form.zielgruppe} onChange={set('zielgruppe')} placeholder={tx('Wen soll das Projekt ansprechen?')} rows={2} />
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="massnahmen">Maßnahmen</Label>
-            <Textarea id="massnahmen" value={form.massnahmen} onChange={set('massnahmen')} placeholder="Welche konkreten Maßnahmen sind geplant?" rows={3} />
+            <Label htmlFor="massnahmen">{tx('Maßnahmen')}</Label>
+            <Textarea id="massnahmen" value={form.massnahmen} onChange={set('massnahmen')} placeholder={tx('Welche konkreten Maßnahmen sind geplant?')} rows={3} />
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="erwartete_ergebnisse">Erwartete Ergebnisse</Label>
-            <Textarea id="erwartete_ergebnisse" value={form.erwartete_ergebnisse} onChange={set('erwartete_ergebnisse')} placeholder="Was wird am Ende des Projekts erreicht sein?" rows={2} />
+            <Label htmlFor="erwartete_ergebnisse">{tx('Erwartete Ergebnisse')}</Label>
+            <Textarea id="erwartete_ergebnisse" value={form.erwartete_ergebnisse} onChange={set('erwartete_ergebnisse')} placeholder={tx('Was wird am Ende des Projekts erreicht sein?')} rows={2} />
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="nachhaltigkeit">Nachhaltigkeit</Label>
-            <Textarea id="nachhaltigkeit" value={form.nachhaltigkeit} onChange={set('nachhaltigkeit')} placeholder="Wie wird das Projekt nach der Förderung weitergeführt?" rows={2} />
+            <Label htmlFor="nachhaltigkeit">{tx('Nachhaltigkeit')}</Label>
+            <Textarea id="nachhaltigkeit" value={form.nachhaltigkeit} onChange={set('nachhaltigkeit')} placeholder={tx('Wie wird das Projekt nach der Förderung weitergeführt?')} rows={2} />
           </div>
 
           {/* Live Summary */}
@@ -502,7 +503,7 @@ export default function AntragEinreichenPage() {
                 <IconCalendar size={16} className="text-primary" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs text-muted-foreground mb-0.5">Projekt</p>
+                <p className="text-xs text-muted-foreground mb-0.5">{tx('Projekt')}</p>
                 <p className="font-semibold text-sm truncate">{form.projekttitel}</p>
                 {(form.projektbeginn || form.projektende) && (
                   <p className="text-xs text-muted-foreground">
@@ -517,10 +518,10 @@ export default function AntragEinreichenPage() {
           <div className="flex justify-between pt-2">
             <Button variant="outline" onClick={() => setStep(1)} className="gap-2">
               <IconArrowLeft size={16} />
-              Zurück
+              {tx('Zurück')}
             </Button>
             <Button onClick={() => setStep(3)} disabled={!step2Valid} className="gap-2">
-              Weiter zur Finanzierung
+              {tx('Weiter zur Finanzierung')}
               <IconArrowRight size={16} />
             </Button>
           </div>
@@ -532,7 +533,7 @@ export default function AntragEinreichenPage() {
         <div className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="gesamtkosten">Gesamtkosten (€) <span className="text-destructive">*</span></Label>
+              <Label htmlFor="gesamtkosten">{tx('Gesamtkosten (€)')} <span className="text-destructive">*</span></Label>
               <Input
                 id="gesamtkosten"
                 type="number"
@@ -544,7 +545,7 @@ export default function AntragEinreichenPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="foerderbetrag">Beantragter Förderbetrag (€) <span className="text-destructive">*</span></Label>
+              <Label htmlFor="foerderbetrag">{tx('Beantragter Förderbetrag (€)')} <span className="text-destructive">*</span></Label>
               <Input
                 id="foerderbetrag"
                 type="number"
@@ -556,7 +557,7 @@ export default function AntragEinreichenPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="eigenanteil">Eigenanteil (€)</Label>
+              <Label htmlFor="eigenanteil">{tx('Eigenanteil (€)')}</Label>
               <Input
                 id="eigenanteil"
                 type="number"
@@ -568,7 +569,7 @@ export default function AntragEinreichenPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="drittmittel">Drittmittel (€, optional)</Label>
+              <Label htmlFor="drittmittel">{tx('Drittmittel (€, optional)')}</Label>
               <Input
                 id="drittmittel"
                 type="number"
@@ -582,12 +583,12 @@ export default function AntragEinreichenPage() {
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="finanzierungsplan">Finanzierungsplan</Label>
+            <Label htmlFor="finanzierungsplan">{tx('Finanzierungsplan')}</Label>
             <Textarea
               id="finanzierungsplan"
               value={form.finanzierungsplan}
               onChange={set('finanzierungsplan')}
-              placeholder="Beschreibe, wie die Gesamtkosten aufgeteilt und gedeckt werden..."
+              placeholder={tx('Beschreibe, wie die Gesamtkosten aufgeteilt und gedeckt werden...')}
               rows={4}
             />
           </div>
@@ -597,7 +598,7 @@ export default function AntragEinreichenPage() {
             <BudgetTracker
               budget={gesamtkosten}
               booked={gedeckt}
-              label="Finanzierungsübersicht"
+              label={tx('Finanzierungsübersicht')}
             />
           )}
 
@@ -612,12 +613,12 @@ export default function AntragEinreichenPage() {
               </div>
               <div className="min-w-0">
                 <p className={`text-sm font-semibold ${luecke > 0 ? 'text-destructive' : 'text-green-700 dark:text-green-400'}`}>
-                  {luecke > 0 ? 'Deckungslücke' : 'Vollständig gedeckt'}
+                  {luecke > 0 ? tx('Deckungslücke') : tx('Vollständig gedeckt')}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {luecke > 0
-                    ? `${formatCurrency(luecke)} fehlen noch zur vollständigen Finanzierung.`
-                    : `Die Gesamtkosten von ${formatCurrency(gesamtkosten)} sind vollständig abgedeckt.`
+                    ? tx`${formatCurrency(luecke)} fehlen noch zur vollständigen Finanzierung.`
+                    : tx`Die Gesamtkosten von ${formatCurrency(gesamtkosten)} sind vollständig abgedeckt.`
                   }
                 </p>
               </div>
@@ -632,21 +633,21 @@ export default function AntragEinreichenPage() {
           {/* Finanzierungs-Übersicht */}
           {gesamtkosten > 0 && (
             <div className="rounded-2xl border bg-card p-4 space-y-2">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Finanzierungsstruktur</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">{tx('Finanzierungsstruktur')}</p>
               <div className="flex items-center justify-between text-sm">
-                <span className="flex items-center gap-2"><IconCoin size={14} className="text-primary" /> Förderbetrag</span>
+                <span className="flex items-center gap-2"><IconCoin size={14} className="text-primary" /> {tx('Förderbetrag')}</span>
                 <span className="font-semibold">{formatCurrency(foerderbetrag)}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="flex items-center gap-2"><IconCoin size={14} className="text-muted-foreground" /> Eigenanteil</span>
+                <span className="flex items-center gap-2"><IconCoin size={14} className="text-muted-foreground" /> {tx('Eigenanteil')}</span>
                 <span className="font-semibold">{formatCurrency(eigenanteil)}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="flex items-center gap-2"><IconCoin size={14} className="text-muted-foreground" /> Drittmittel</span>
+                <span className="flex items-center gap-2"><IconCoin size={14} className="text-muted-foreground" /> {tx('Drittmittel')}</span>
                 <span className="font-semibold">{formatCurrency(drittmittel)}</span>
               </div>
               <div className="border-t pt-2 flex items-center justify-between text-sm font-semibold">
-                <span>Gesamtkosten</span>
+                <span>{tx('Gesamtkosten')}</span>
                 <span>{formatCurrency(gesamtkosten)}</span>
               </div>
             </div>
@@ -656,10 +657,10 @@ export default function AntragEinreichenPage() {
           <div className="flex justify-between pt-2">
             <Button variant="outline" onClick={() => setStep(2)} className="gap-2">
               <IconArrowLeft size={16} />
-              Zurück
+              {tx('Zurück')}
             </Button>
             <Button onClick={() => setStep(4)} disabled={!step3Valid} className="gap-2">
-              Weiter zur Einreichung
+              {tx('Weiter zur Einreichung')}
               <IconArrowRight size={16} />
             </Button>
           </div>
@@ -675,26 +676,26 @@ export default function AntragEinreichenPage() {
               <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
                 <IconUser size={14} className="text-primary" />
               </div>
-              <SectionTitle>Antragsteller</SectionTitle>
+              <SectionTitle>{tx('Antragsteller')}</SectionTitle>
             </div>
             <div className="space-y-1.5">
               <SummaryRow
-                label="Name"
+                label={tx('Name')}
                 value={[
                   anredeOptions.find(o => o.key === form.anrede)?.label,
                   form.antragsteller_vorname,
                   form.antragsteller_nachname,
                 ].filter(Boolean).join(' ')}
               />
-              <SummaryRow label="Organisation" value={form.organisation} />
+              <SummaryRow label={tx('Organisation')} value={form.organisation} />
               <SummaryRow
-                label="Rechtsform"
+                label={tx('Rechtsform')}
                 value={rechtsformOptions.find(o => o.key === form.rechtsform)?.label ?? ''}
               />
-              <SummaryRow label="E-Mail" value={form.antragsteller_email} />
-              <SummaryRow label="Telefon" value={form.antragsteller_telefon} />
+              <SummaryRow label={tx('E-Mail')} value={form.antragsteller_email} />
+              <SummaryRow label={tx('Telefon')} value={form.antragsteller_telefon} />
               <SummaryRow
-                label="Adresse"
+                label={tx('Adresse')}
                 value={[form.strasse, form.hausnummer, form.plz, form.ort].filter(Boolean).join(' ')}
               />
             </div>
@@ -705,29 +706,29 @@ export default function AntragEinreichenPage() {
               <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
                 <IconBuildingCommunity size={14} className="text-primary" />
               </div>
-              <SectionTitle>Projektdetails</SectionTitle>
+              <SectionTitle>{tx('Projektdetails')}</SectionTitle>
             </div>
             <div className="space-y-1.5">
-              <SummaryRow label="Projekttitel" value={form.projekttitel} />
+              <SummaryRow label={tx('Projekttitel')} value={form.projekttitel} />
               <SummaryRow
-                label="Förderkategorie"
+                label={tx('Förderkategorie')}
                 value={foerderkategorieOptions.find(o => o.key === form.foerderkategorie)?.label ?? ''}
               />
-              <SummaryRow label="Förderprogramm" value={form.foerderprogramm} />
-              <SummaryRow label="Projektort" value={form.projektort} />
+              <SummaryRow label={tx('Förderprogramm')} value={form.foerderprogramm} />
+              <SummaryRow label={tx('Projektort')} value={form.projektort} />
               <SummaryRow
-                label="Laufzeit"
+                label={tx('Laufzeit')}
                 value={
                   form.projektbeginn && form.projektende
                     ? `${formatDate(form.projektbeginn)} – ${formatDate(form.projektende)}`
                     : form.projektbeginn
-                    ? `Ab ${formatDate(form.projektbeginn)}`
+                    ? tx`Ab ${formatDate(form.projektbeginn)}`
                     : ''
                 }
               />
               {form.projektkurzbeschreibung && (
                 <div className="min-w-0">
-                  <span className="text-muted-foreground text-sm block mb-1">Kurzbeschreibung</span>
+                  <span className="text-muted-foreground text-sm block mb-1">{tx('Kurzbeschreibung')}</span>
                   <p className="text-sm text-foreground line-clamp-2">{form.projektkurzbeschreibung}</p>
                 </div>
               )}
@@ -739,17 +740,17 @@ export default function AntragEinreichenPage() {
               <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
                 <IconCoin size={14} className="text-primary" />
               </div>
-              <SectionTitle>Finanzierung</SectionTitle>
+              <SectionTitle>{tx('Finanzierung')}</SectionTitle>
             </div>
             <div className="space-y-1.5">
-              <SummaryRow label="Gesamtkosten" value={gesamtkosten > 0 ? formatCurrency(gesamtkosten) : ''} />
-              <SummaryRow label="Förderbetrag" value={foerderbetrag > 0 ? formatCurrency(foerderbetrag) : ''} />
-              <SummaryRow label="Eigenanteil" value={eigenanteil > 0 ? formatCurrency(eigenanteil) : ''} />
-              <SummaryRow label="Drittmittel" value={drittmittel > 0 ? formatCurrency(drittmittel) : ''} />
+              <SummaryRow label={tx('Gesamtkosten')} value={gesamtkosten > 0 ? formatCurrency(gesamtkosten) : ''} />
+              <SummaryRow label={tx('Förderbetrag')} value={foerderbetrag > 0 ? formatCurrency(foerderbetrag) : ''} />
+              <SummaryRow label={tx('Eigenanteil')} value={eigenanteil > 0 ? formatCurrency(eigenanteil) : ''} />
+              <SummaryRow label={tx('Drittmittel')} value={drittmittel > 0 ? formatCurrency(drittmittel) : ''} />
               {luecke !== 0 && gesamtkosten > 0 && (
                 <SummaryRow
-                  label="Deckungslücke"
-                  value={luecke > 0 ? `${formatCurrency(luecke)} fehlen` : 'Vollständig gedeckt'}
+                  label={tx('Deckungslücke')}
+                  value={luecke > 0 ? `${formatCurrency(luecke)} fehlen` : tx('Vollständig gedeckt')}
                 />
               )}
             </div>
@@ -758,17 +759,17 @@ export default function AntragEinreichenPage() {
           {/* Eingangsdatum + Notizen */}
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="eingangsdatum">Eingangsdatum <span className="text-destructive">*</span></Label>
+              <Label htmlFor="eingangsdatum">{tx('Eingangsdatum')} <span className="text-destructive">*</span></Label>
               <Input id="eingangsdatum" type="date" value={form.eingangsdatum} onChange={set('eingangsdatum')} />
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="bearbeitungsnotizen">Bearbeitungsnotizen (optional)</Label>
+              <Label htmlFor="bearbeitungsnotizen">{tx('Bearbeitungsnotizen (optional)')}</Label>
               <Textarea
                 id="bearbeitungsnotizen"
                 value={form.bearbeitungsnotizen}
                 onChange={set('bearbeitungsnotizen')}
-                placeholder="Interne Hinweise oder Anmerkungen zum Antrag..."
+                placeholder={tx('Interne Hinweise oder Anmerkungen zum Antrag...')}
                 rows={3}
               />
             </div>
@@ -778,7 +779,7 @@ export default function AntragEinreichenPage() {
           <div className="rounded-xl border bg-muted/40 p-3 flex items-center gap-2">
             <IconCheck size={15} className="text-muted-foreground shrink-0" />
             <p className="text-xs text-muted-foreground">
-              Der Antrag wird mit dem Status <span className="font-medium text-foreground">{antragstatusOptions[0]?.label ?? 'Eingegangen'}</span> angelegt.
+              {tx('Der Antrag wird mit dem Status')} <span className="font-medium text-foreground">{antragstatusOptions[0]?.label ?? tx('Eingegangen')}</span> {tx('angelegt.')}
             </p>
           </div>
 
@@ -794,15 +795,15 @@ export default function AntragEinreichenPage() {
           <div className="flex justify-between pt-2">
             <Button variant="outline" onClick={() => setStep(3)} className="gap-2" disabled={submitting}>
               <IconArrowLeft size={16} />
-              Zurück
+              {tx('Zurück')}
             </Button>
             <Button onClick={handleSubmit} disabled={submitting || !form.eingangsdatum} className="gap-2">
               {submitting ? (
-                <>Wird eingereicht…</>
+                <>{tx('Wird eingereicht…')}</>
               ) : (
                 <>
                   <IconSend size={16} />
-                  Antrag einreichen
+                  {tx('Antrag einreichen')}
                 </>
               )}
             </Button>

@@ -28,6 +28,7 @@ const ALLOWED_AT = [
   '@/components/widgets/',
   '@/lib/utils',
   '@/lib/formatters',
+  '@/i18n',
   '@/types/',
 ];
 
@@ -52,12 +53,18 @@ for (const file of pageFiles) {
   const src = readFileSync(file, 'utf8');
   // A record reference written for the authenticated REST API is rejected by
   // the anonymous surface with 400 "Unsupported field value" — applookup
-  // values must be grant-scoped. Live-proven: a course registration built the
-  // participant URL by hand and died at its second create.
-  const restUrl = /['"`][^'"`]*\/rest\/apps\/[^'"`]*['"`]/.exec(src);
+  // values must be grant-scoped. Live-proven twice: a course registration
+  // built the participant URL by hand in one literal, and a document form
+  // glued origin+"/rest" from parts — which a one-literal regex
+  // (/['"`]…\/rest\/apps\/…['"`]/) provably missed. The authenticated
+  // prefix has NO legitimate use in a public page, however it is spelled, so
+  // flag `/rest` wherever a delimiter follows (`/rest'`, `/rest"`,
+  // backtick, `/rest/`) — that catches glued forms without tripping on
+  // words like "/restaurants".
+  const restUrl = /\/rest['"`\/]/.exec(src);
   if (restUrl) {
     const line = src.slice(0, restUrl.index).split('\n').length;
-    errors.push(`${file}:${line}: hand-built REST record URL ${restUrl[0]} — the anonymous surface only accepts grant-scoped references; use recordRef(cfg, page, appId, recordId) from '@/lib/publicClient', or pass a reference URL through exactly as a list response returned it`);
+    errors.push(`${file}:${line}: reference to the authenticated /rest surface — public pages must not build /rest URLs (the anonymous surface rejects them); use recordRef(cfg, page, appId, recordId) from '@/lib/publicClient', or pass a reference URL through exactly as a list response returned it`);
   }
   let m;
   while ((m = IMPORT_RE.exec(src)) !== null) {
@@ -145,6 +152,28 @@ for (const [slug, page] of surfacePages) {
   for (const ep of page.endpoints || []) {
     if (ep.scope && !ep.scope_description) {
       errors.push(`${SURFACE}: page '${slug}' endpoint '${ep.entity}' has a scope but no scope_description — the owner confirms that text when publishing, never the vSQL`);
+    }
+    // The entity identifier must EXIST. Guessing it from the app's display
+    // name is the classic failure: an app called "Kurse & Workshops" has the
+    // identifier `kurse_workshops`, not `kurse_&_workshops`. The ingest then
+    // raises "unknown entity" and drops the WHOLE page — visible only as one
+    // [WARNING] line in the deploy stream, so the owner just sees nothing.
+    // Every check below silently passes for an unknown entity (`controls`
+    // falls back to {}), which is why this has to come first.
+    if (appMeta) {
+      const known = Object.keys(appMeta.apps || {});
+      if (!known.includes(ep.entity)) {
+        errors.push(`${SURFACE}: page '${slug}' references unknown entity '${ep.entity}' — use the IDENTIFIER from app_metadata.json, never the display name. Known: ${known.join(', ')}`);
+        continue;
+      }
+      // Same trap one level down: a field key that does not exist is rejected
+      // by the ingest with "invalid field selection", again dropping the page.
+      const controlKeys = Object.keys(appMeta.apps[ep.entity].controls || {});
+      for (const key of [...(ep.fields || []), ...Object.keys(ep.preset_fields || {}), ...Object.keys(ep.default_fields || {})]) {
+        if (!controlKeys.includes(key)) {
+          errors.push(`${SURFACE}: page '${slug}' endpoint '${ep.entity}' references unknown field '${key}' — known fields: ${controlKeys.join(', ')}`);
+        }
+      }
     }
     // Scope shape: the server probes the vSQL expression when the grant is
     // created (at publish) — a malformed scope fails silently late, so the

@@ -15,12 +15,12 @@ import { FoerderantraegeDialog } from '@/components/dialogs/FoerderantraegeDialo
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { PageShell } from '@/components/PageShell';
 import { AI_PHOTO_SCAN, AI_PHOTO_LOCATION } from '@/config/ai-features';
+import { t, appLabel, fieldLabel, lookupLabel, dateFnsLocale, dateFormat } from '@/i18n';
 import { format, parseISO } from 'date-fns';
-import { de } from 'date-fns/locale';
 
 function formatDate(d?: string) {
   if (!d) return '—';
-  try { return format(parseISO(d), 'dd.MM.yyyy', { locale: de }); } catch { return d; }
+  try { return format(parseISO(d), dateFormat(), { locale: dateFnsLocale() }); } catch { return d; }
 }
 
 export default function FoerderantraegePage() {
@@ -119,18 +119,18 @@ export default function FoerderantraegePage() {
 
   return (
     <PageShell
-      title="Förderanträge"
-      subtitle={`${records.length} Förderanträge im System`}
+      title={appLabel('foerderantraege')}
+      subtitle={`${records.length} ${t('in_system', { entity: appLabel('foerderantraege') })}`}
       action={
         <Button onClick={() => setDialogOpen(true)} className="shrink-0 rounded-full shadow-sm">
-          <IconPlus className="h-4 w-4 mr-2" /> Hinzufügen
+          <IconPlus className="h-4 w-4 mr-2" /> {t('add')}
         </Button>
       }
     >
       <div className="relative w-full max-w-sm">
         <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Förderanträge suchen..."
+          placeholder={t('search_entity', { entity: appLabel('foerderantraege') })}
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="pl-9"
@@ -142,237 +142,237 @@ export default function FoerderantraegePage() {
             <TableRow className="border-b border-input">
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('anrede')}>
                 <span className="inline-flex items-center gap-1">
-                  Anrede
+                  {fieldLabel('foerderantraege', 'anrede')}
                   {sortKey === 'anrede' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('antragsteller_vorname')}>
                 <span className="inline-flex items-center gap-1">
-                  Vorname
+                  {fieldLabel('foerderantraege', 'antragsteller_vorname')}
                   {sortKey === 'antragsteller_vorname' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('antragsteller_nachname')}>
                 <span className="inline-flex items-center gap-1">
-                  Nachname
+                  {fieldLabel('foerderantraege', 'antragsteller_nachname')}
                   {sortKey === 'antragsteller_nachname' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('organisation')}>
                 <span className="inline-flex items-center gap-1">
-                  Organisation / Institution
+                  {fieldLabel('foerderantraege', 'organisation')}
                   {sortKey === 'organisation' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('rechtsform')}>
                 <span className="inline-flex items-center gap-1">
-                  Rechtsform
+                  {fieldLabel('foerderantraege', 'rechtsform')}
                   {sortKey === 'rechtsform' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('strasse')}>
                 <span className="inline-flex items-center gap-1">
-                  Straße
+                  {fieldLabel('foerderantraege', 'strasse')}
                   {sortKey === 'strasse' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('hausnummer')}>
                 <span className="inline-flex items-center gap-1">
-                  Hausnummer
+                  {fieldLabel('foerderantraege', 'hausnummer')}
                   {sortKey === 'hausnummer' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('plz')}>
                 <span className="inline-flex items-center gap-1">
-                  Postleitzahl
+                  {fieldLabel('foerderantraege', 'plz')}
                   {sortKey === 'plz' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('ort')}>
                 <span className="inline-flex items-center gap-1">
-                  Ort
+                  {fieldLabel('foerderantraege', 'ort')}
                   {sortKey === 'ort' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('land')}>
                 <span className="inline-flex items-center gap-1">
-                  Land
+                  {fieldLabel('foerderantraege', 'land')}
                   {sortKey === 'land' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('antragsteller_email')}>
                 <span className="inline-flex items-center gap-1">
-                  E-Mail-Adresse des Antragstellers
+                  {fieldLabel('foerderantraege', 'antragsteller_email')}
                   {sortKey === 'antragsteller_email' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('antragsteller_telefon')}>
                 <span className="inline-flex items-center gap-1">
-                  Telefonnummer des Antragstellers
+                  {fieldLabel('foerderantraege', 'antragsteller_telefon')}
                   {sortKey === 'antragsteller_telefon' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('antragsteller_website')}>
                 <span className="inline-flex items-center gap-1">
-                  Website des Antragstellers
+                  {fieldLabel('foerderantraege', 'antragsteller_website')}
                   {sortKey === 'antragsteller_website' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('projekttitel')}>
                 <span className="inline-flex items-center gap-1">
-                  Projekttitel
+                  {fieldLabel('foerderantraege', 'projekttitel')}
                   {sortKey === 'projekttitel' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('projektkurzbeschreibung')}>
                 <span className="inline-flex items-center gap-1">
-                  Kurzbeschreibung des Projekts
+                  {fieldLabel('foerderantraege', 'projektkurzbeschreibung')}
                   {sortKey === 'projektkurzbeschreibung' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('projektbeginn')}>
                 <span className="inline-flex items-center gap-1">
-                  Projektbeginn
+                  {fieldLabel('foerderantraege', 'projektbeginn')}
                   {sortKey === 'projektbeginn' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('projektende')}>
                 <span className="inline-flex items-center gap-1">
-                  Projektende
+                  {fieldLabel('foerderantraege', 'projektende')}
                   {sortKey === 'projektende' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('projektort')}>
                 <span className="inline-flex items-center gap-1">
-                  Projektort
+                  {fieldLabel('foerderantraege', 'projektort')}
                   {sortKey === 'projektort' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('foerderprogramm')}>
                 <span className="inline-flex items-center gap-1">
-                  Förderprogramm
+                  {fieldLabel('foerderantraege', 'foerderprogramm')}
                   {sortKey === 'foerderprogramm' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('foerderkategorie')}>
                 <span className="inline-flex items-center gap-1">
-                  Förderkategorie
+                  {fieldLabel('foerderantraege', 'foerderkategorie')}
                   {sortKey === 'foerderkategorie' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('gesamtkosten')}>
                 <span className="inline-flex items-center gap-1">
-                  Gesamtkosten des Projekts (€)
+                  {fieldLabel('foerderantraege', 'gesamtkosten')}
                   {sortKey === 'gesamtkosten' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('beantragter_foerderbetrag')}>
                 <span className="inline-flex items-center gap-1">
-                  Beantragter Förderbetrag (€)
+                  {fieldLabel('foerderantraege', 'beantragter_foerderbetrag')}
                   {sortKey === 'beantragter_foerderbetrag' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('eigenanteil')}>
                 <span className="inline-flex items-center gap-1">
-                  Eigenanteil (€)
+                  {fieldLabel('foerderantraege', 'eigenanteil')}
                   {sortKey === 'eigenanteil' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('drittmittel')}>
                 <span className="inline-flex items-center gap-1">
-                  Drittmittel (€)
+                  {fieldLabel('foerderantraege', 'drittmittel')}
                   {sortKey === 'drittmittel' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('finanzierungsplan')}>
                 <span className="inline-flex items-center gap-1">
-                  Finanzierungsplan
+                  {fieldLabel('foerderantraege', 'finanzierungsplan')}
                   {sortKey === 'finanzierungsplan' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('projektziele')}>
                 <span className="inline-flex items-center gap-1">
-                  Projektziele
+                  {fieldLabel('foerderantraege', 'projektziele')}
                   {sortKey === 'projektziele' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('zielgruppe')}>
                 <span className="inline-flex items-center gap-1">
-                  Zielgruppe
+                  {fieldLabel('foerderantraege', 'zielgruppe')}
                   {sortKey === 'zielgruppe' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('massnahmen')}>
                 <span className="inline-flex items-center gap-1">
-                  Geplante Maßnahmen
+                  {fieldLabel('foerderantraege', 'massnahmen')}
                   {sortKey === 'massnahmen' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('erwartete_ergebnisse')}>
                 <span className="inline-flex items-center gap-1">
-                  Erwartete Ergebnisse
+                  {fieldLabel('foerderantraege', 'erwartete_ergebnisse')}
                   {sortKey === 'erwartete_ergebnisse' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('nachhaltigkeit')}>
                 <span className="inline-flex items-center gap-1">
-                  Nachhaltigkeit des Projekts
+                  {fieldLabel('foerderantraege', 'nachhaltigkeit')}
                   {sortKey === 'nachhaltigkeit' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('datei_projektbeschreibung')}>
                 <span className="inline-flex items-center gap-1">
-                  Projektbeschreibung (Datei)
+                  {fieldLabel('foerderantraege', 'datei_projektbeschreibung')}
                   {sortKey === 'datei_projektbeschreibung' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('datei_kostenplan')}>
                 <span className="inline-flex items-center gap-1">
-                  Kostenplan (Datei)
+                  {fieldLabel('foerderantraege', 'datei_kostenplan')}
                   {sortKey === 'datei_kostenplan' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('datei_weitere_anlagen')}>
                 <span className="inline-flex items-center gap-1">
-                  Weitere Anlagen
+                  {fieldLabel('foerderantraege', 'datei_weitere_anlagen')}
                   {sortKey === 'datei_weitere_anlagen' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('eingangsdatum')}>
                 <span className="inline-flex items-center gap-1">
-                  Eingangsdatum des Antrags
+                  {fieldLabel('foerderantraege', 'eingangsdatum')}
                   {sortKey === 'eingangsdatum' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('antragsstatus')}>
                 <span className="inline-flex items-center gap-1">
-                  Antragsstatus
+                  {fieldLabel('foerderantraege', 'antragsstatus')}
                   {sortKey === 'antragsstatus' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('bearbeiter')}>
                 <span className="inline-flex items-center gap-1">
-                  Zuständiger Sachbearbeiter
+                  {fieldLabel('foerderantraege', 'bearbeiter')}
                   {sortKey === 'bearbeiter' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
               <TableHead className="uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => toggleSort('bearbeitungsnotizen')}>
                 <span className="inline-flex items-center gap-1">
-                  Bearbeitungsnotizen
+                  {fieldLabel('foerderantraege', 'bearbeitungsnotizen')}
                   {sortKey === 'bearbeitungsnotizen' ? (sortDir === 'asc' ? <IconArrowUp size={14} /> : <IconArrowDown size={14} />) : <IconArrowsUpDown size={14} className="opacity-30" />}
                 </span>
               </TableHead>
-              <TableHead className="w-24 uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6">Aktionen</TableHead>
+              <TableHead className="w-24 uppercase text-xs font-semibold text-secondary-foreground tracking-wider px-6">{t('actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {sortRecords(filtered).map(record => (
               <TableRow key={record.record_id} className="hover:bg-muted/50 transition-colors cursor-pointer" onClick={(e) => { if ((e.target as HTMLElement).closest('button, [role="checkbox"]')) return; navigate(`/foerderantraege/${record.record_id}`); }}>
-                <TableCell><span className="inline-flex items-center bg-secondary border border-[#bfdbfe] text-[#2563eb] rounded-[10px] px-2 py-1 text-sm font-medium">{record.fields.anrede?.label ?? '—'}</span></TableCell>
+                <TableCell><span className="inline-flex items-center bg-secondary border border-[#bfdbfe] text-[#2563eb] rounded-[10px] px-2 py-1 text-sm font-medium">{lookupLabel('foerderantraege', 'anrede', record.fields.anrede?.key) ?? record.fields.anrede?.label ?? '—'}</span></TableCell>
                 <TableCell className="font-medium">{record.fields.antragsteller_vorname ?? '—'}</TableCell>
                 <TableCell>{record.fields.antragsteller_nachname ?? '—'}</TableCell>
                 <TableCell>{record.fields.organisation ?? '—'}</TableCell>
-                <TableCell><span className="inline-flex items-center bg-secondary border border-[#bfdbfe] text-[#2563eb] rounded-[10px] px-2 py-1 text-sm font-medium">{record.fields.rechtsform?.label ?? '—'}</span></TableCell>
+                <TableCell><span className="inline-flex items-center bg-secondary border border-[#bfdbfe] text-[#2563eb] rounded-[10px] px-2 py-1 text-sm font-medium">{lookupLabel('foerderantraege', 'rechtsform', record.fields.rechtsform?.key) ?? record.fields.rechtsform?.label ?? '—'}</span></TableCell>
                 <TableCell>{record.fields.strasse ?? '—'}</TableCell>
                 <TableCell>{record.fields.hausnummer ?? '—'}</TableCell>
                 <TableCell>{record.fields.plz ?? '—'}</TableCell>
@@ -387,7 +387,7 @@ export default function FoerderantraegePage() {
                 <TableCell className="text-muted-foreground">{formatDate(record.fields.projektende)}</TableCell>
                 <TableCell>{record.fields.projektort ?? '—'}</TableCell>
                 <TableCell>{record.fields.foerderprogramm ?? '—'}</TableCell>
-                <TableCell><span className="inline-flex items-center bg-secondary border border-[#bfdbfe] text-[#2563eb] rounded-[10px] px-2 py-1 text-sm font-medium">{record.fields.foerderkategorie?.label ?? '—'}</span></TableCell>
+                <TableCell><span className="inline-flex items-center bg-secondary border border-[#bfdbfe] text-[#2563eb] rounded-[10px] px-2 py-1 text-sm font-medium">{lookupLabel('foerderantraege', 'foerderkategorie', record.fields.foerderkategorie?.key) ?? record.fields.foerderkategorie?.label ?? '—'}</span></TableCell>
                 <TableCell>{record.fields.gesamtkosten ?? '—'}</TableCell>
                 <TableCell>{record.fields.beantragter_foerderbetrag ?? '—'}</TableCell>
                 <TableCell>{record.fields.eigenanteil ?? '—'}</TableCell>
@@ -402,7 +402,7 @@ export default function FoerderantraegePage() {
                 <TableCell>{record.fields.datei_kostenplan ? <div className="relative h-8 w-8 rounded bg-muted overflow-hidden"><div className="absolute inset-0 flex items-center justify-center"><IconFileText size={14} className="text-muted-foreground" /></div><img src={record.fields.datei_kostenplan} alt="" className="relative h-full w-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} /></div> : '—'}</TableCell>
                 <TableCell>{record.fields.datei_weitere_anlagen ? <div className="relative h-8 w-8 rounded bg-muted overflow-hidden"><div className="absolute inset-0 flex items-center justify-center"><IconFileText size={14} className="text-muted-foreground" /></div><img src={record.fields.datei_weitere_anlagen} alt="" className="relative h-full w-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} /></div> : '—'}</TableCell>
                 <TableCell className="text-muted-foreground">{formatDate(record.fields.eingangsdatum)}</TableCell>
-                <TableCell><span className="inline-flex items-center bg-secondary border border-[#bfdbfe] text-[#2563eb] rounded-[10px] px-2 py-1 text-sm font-medium">{record.fields.antragsstatus?.label ?? '—'}</span></TableCell>
+                <TableCell><span className="inline-flex items-center bg-secondary border border-[#bfdbfe] text-[#2563eb] rounded-[10px] px-2 py-1 text-sm font-medium">{lookupLabel('foerderantraege', 'antragsstatus', record.fields.antragsstatus?.key) ?? record.fields.antragsstatus?.label ?? '—'}</span></TableCell>
                 <TableCell><span className="inline-flex items-center bg-secondary border border-[#bfdbfe] text-[#2563eb] rounded-[10px] px-2 py-1 text-sm font-medium">{getSachbearbeiterDisplayName(record.fields.bearbeiter)}</span></TableCell>
                 <TableCell className="max-w-xs"><span className="truncate block">{record.fields.bearbeitungsnotizen ?? '—'}</span></TableCell>
                 <TableCell>
@@ -420,7 +420,7 @@ export default function FoerderantraegePage() {
             {filtered.length === 0 && (
               <TableRow>
                 <TableCell colSpan={38} className="text-center py-16 text-muted-foreground">
-                  {search ? 'Keine Ergebnisse gefunden.' : 'Noch keine Förderanträge. Jetzt hinzufügen!'}
+                  {search ? t('no_results') : t('no_data_yet', { entity: appLabel('foerderantraege') })}
                 </TableCell>
               </TableRow>
             )}
@@ -443,8 +443,8 @@ export default function FoerderantraegePage() {
         open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDelete}
-        title="Förderanträge löschen"
-        description="Soll dieser Eintrag wirklich gelöscht werden? Diese Aktion kann nicht rückgängig gemacht werden."
+        title={t('delete_entity', { entity: appLabel('foerderantraege') })}
+        description={t('confirm_delete_desc')}
       />
 
     </PageShell>

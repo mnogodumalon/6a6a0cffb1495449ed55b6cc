@@ -31,13 +31,9 @@ import {
   IconFileText,
   IconArrowRight,
 } from '@tabler/icons-react';
+import { tx } from '@/i18n';
 
 // ─── Kolumnen aus dem Schema ────────────────────────────────────────────────
-
-const COLUMNS: KanbanColumn[] = (LOOKUP_OPTIONS['foerderantraege']?.['antragsstatus'] ?? []).map(o => ({
-  key: o.key,
-  label: o.label,
-}));
 
 function toneForStatus(status: string | undefined): KanbanTone {
   if (status === 'bewilligt') return 'success';
@@ -56,6 +52,11 @@ type OverlayItem =
 // ─── Hauptkomponente ────────────────────────────────────────────────────────
 
 export default function DashboardOverview() {
+  const COLUMNS: KanbanColumn[] = (LOOKUP_OPTIONS['foerderantraege']?.['antragsstatus'] ?? []).map(o => ({
+  key: o.key,
+  label: o.label,
+}));
+
   const {
     sachbearbeiter, setSachbearbeiter,
     foerderantraege, setFoerderantraege,
@@ -102,7 +103,7 @@ export default function DashboardOverview() {
         return {
           id: `antrag:${r.record_id}`,
           column: status,
-          title: (r.fields.projekttitel ?? `${r.fields.antragsteller_vorname ?? ''} ${r.fields.antragsteller_nachname ?? ''}`.trim()) || 'Ohne Titel',
+          title: (r.fields.projekttitel ?? `${r.fields.antragsteller_vorname ?? ''} ${r.fields.antragsteller_nachname ?? ''}`.trim()) || tx('Ohne Titel'),
           subtitle: r.bearbeiterName
             ? `${r.bearbeiterName} · ${formatDate(r.fields.eingangsdatum)}`
             : formatDate(r.fields.eingangsdatum),
@@ -129,7 +130,7 @@ export default function DashboardOverview() {
         ),
       );
       const columnLabel = COLUMNS.find(c => c.key === newColumn)?.label ?? newColumn;
-      undoToast(`Status geändert zu „${columnLabel}"`, async () => {
+      undoToast(tx`Status geändert zu „${columnLabel}"`, async () => {
         setFoerderantraege(prev =>
           prev.map(r =>
             r.record_id === rid
@@ -172,7 +173,7 @@ export default function DashboardOverview() {
         ),
       );
       const nextLabel = COLUMNS.find(c => c.key === next)?.label ?? next;
-      undoToast(`Status → „${nextLabel}" gesetzt`, async () => {
+      undoToast(tx`Status → „${nextLabel}" gesetzt`, async () => {
         setFoerderantraege(prev =>
           prev.map(r =>
             r.record_id === record.record_id
@@ -208,32 +209,32 @@ export default function DashboardOverview() {
   );
   const kontextSatz =
     foerderantraege.length === 0
-      ? 'Noch keine Förderanträge vorhanden — lege jetzt den ersten an.'
+      ? tx('Noch keine Förderanträge vorhanden — lege jetzt den ersten an.')
       : nachforderung.length > 0
-        ? `${nachforderung.length} ${nachforderung.length === 1 ? 'Antrag wartet' : 'Anträge warten'} auf Nachbesserung.`
+        ? tx`${nachforderung.length} ${nachforderung.length === 1 ? tx('Antrag wartet') : tx('Anträge warten')} auf Nachbesserung.`
         : namensListe.length > 0
-          ? `Zuletzt eingegangen: ${namen(namensListe)}.`
-          : `${foerderantraege.length} Anträge in der Verwaltung.`;
+          ? tx`Zuletzt eingegangen: ${namen(namensListe)}.`
+          : tx`${foerderantraege.length} Anträge in der Verwaltung.`;
 
   // ─── Kein-Inhalt-Zustand ──────────────────────────────────────────────────
   if (foerderantraege.length === 0) {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-semibold">{gruss(clock)} Förderantragsverwaltung</h1>
-          <p className="text-muted-foreground mt-1">Richte deine Förderantragsverwaltung ein.</p>
+          <h1 className="text-2xl font-semibold">{gruss(clock)} {tx('Förderantragsverwaltung')}</h1>
+          <p className="text-muted-foreground mt-1">{tx('Richte deine Förderantragsverwaltung ein.')}</p>
         </div>
         <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-20 gap-4">
           <IconFileText size={48} className="text-muted-foreground" stroke={1.5} />
           <p className="text-muted-foreground text-center max-w-sm">
-            Noch kein Förderantrag vorhanden. Lege jetzt den ersten an und verwalte die gesamte Pipeline hier.
+            {tx('Noch kein Förderantrag vorhanden. Lege jetzt den ersten an und verwalte die gesamte Pipeline hier.')}
           </p>
           <button
             className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
             onClick={() => { setCreateAntragDefaults(undefined); setCreateAntragOpen(true); }}
           >
             <IconPlus size={16} className="shrink-0" />
-            Ersten Antrag aufnehmen
+            {tx('Ersten Antrag aufnehmen')}
           </button>
         </div>
         <FoerderantraegeDialog
@@ -264,12 +265,12 @@ export default function DashboardOverview() {
     <HeroBanner
       icon={<IconAlertTriangle size={18} />}
       action={{
-        label: 'In Bearbeitung setzen',
+        label: tx('In Bearbeitung setzen'),
         onClick: () => void advanceStatus(nachforderung[0]),
       }}
     >
       <b>{namen(nachforderung.map(r => r.fields.projekttitel ?? `${r.fields.antragsteller_vorname ?? ''} ${r.fields.antragsteller_nachname ?? ''}`.trim()))}</b>
-      {' '}{nachforderung.length === 1 ? 'wartet' : 'warten'} auf Nachbesserung durch den Antragsteller.
+      {' '}{nachforderung.length === 1 ? 'wartet' : 'warten'} {tx('auf Nachbesserung durch den Antragsteller.')}
     </HeroBanner>
   );
 
@@ -277,10 +278,10 @@ export default function DashboardOverview() {
   const asideContent = (
     <>
       <WorkList
-        title="Neu eingegangen"
+        title={tx('Neu eingegangen')}
         items={eingegangen.slice(0, 5).map(r => ({
           id: r.record_id,
-          title: (r.fields.projekttitel ?? `${r.fields.antragsteller_vorname ?? ''} ${r.fields.antragsteller_nachname ?? ''}`.trim()) || 'Ohne Titel',
+          title: (r.fields.projekttitel ?? `${r.fields.antragsteller_vorname ?? ''} ${r.fields.antragsteller_nachname ?? ''}`.trim()) || tx('Ohne Titel'),
           secondLine: (
             <span className="text-muted-foreground text-xs">
               {formatDate(r.fields.eingangsdatum)}
@@ -288,22 +289,22 @@ export default function DashboardOverview() {
             </span>
           ),
           action: {
-            label: <span className="flex items-center gap-1 text-xs"><IconArrowRight size={12} className="shrink-0" />Bearbeiten</span>,
+            label: <span className="flex items-center gap-1 text-xs"><IconArrowRight size={12} className="shrink-0" />{tx('Bearbeiten')}</span>,
             onClick: () => void advanceStatus(r),
           },
         }))}
         onItemClick={id => overlay.replace({ type: 'foerderantrag', id })}
         empty={{
-          text: 'Alle neuen Anträge wurden aufgenommen.',
+          text: tx('Alle neuen Anträge wurden aufgenommen.'),
           action: {
-            label: 'Neuen Antrag aufnehmen',
+            label: tx('Neuen Antrag aufnehmen'),
             onClick: () => { setCreateAntragDefaults({ antragsstatus: 'eingegangen' }); setCreateAntragOpen(true); },
           },
         }}
       />
 
       <ChartWidget
-        title="Anträge nach Kategorie"
+        title={tx('Anträge nach Kategorie')}
         rows={chartRows}
         dimension={{
           kind: 'category',
@@ -325,7 +326,7 @@ export default function DashboardOverview() {
       <div className="mb-6">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-2xl font-semibold">{gruss(clock)} Förderantragsverwaltung</h1>
+            <h1 className="text-2xl font-semibold">{gruss(clock)} {tx('Förderantragsverwaltung')}</h1>
             <p className="text-muted-foreground mt-1">{kontextSatz}</p>
           </div>
           <button
@@ -333,7 +334,7 @@ export default function DashboardOverview() {
             onClick={() => { setCreateAntragDefaults(undefined); setCreateAntragOpen(true); }}
           >
             <IconPlus size={16} className="shrink-0" />
-            Neuer Antrag
+            {tx('Neuer Antrag')}
           </button>
         </div>
       </div>
@@ -344,22 +345,22 @@ export default function DashboardOverview() {
         kpis={
           <StatStrip>
             <StatStripItem
-              title="Offen"
+              title={tx('Offen')}
               value={offeneAntraege.length}
               tone={offeneAntraege.length > 0 ? 'primary' : 'default'}
             />
             <StatStripItem
-              title="Nachforderung"
+              title={tx('Nachforderung')}
               value={nachforderung.length}
               tone={nachforderung.length > 0 ? 'warning' : 'default'}
             />
             <StatStripItem
-              title="Ohne Sachbearbeiter"
+              title={tx('Ohne Sachbearbeiter')}
               value={ohneBearbeiter.length}
               tone={ohneBearbeiter.length > 0 ? 'warning' : 'default'}
             />
             <StatStripItem
-              title="Bewilligter Betrag"
+              title={tx('Bewilligter Betrag')}
               value={formatCurrency(bewilligterBetrag)}
               tone="success"
             />
@@ -421,7 +422,7 @@ export default function DashboardOverview() {
             return (
               <>
                 <RecordHeader
-                  title={(record.fields.projekttitel ?? `${record.fields.antragsteller_vorname ?? ''} ${record.fields.antragsteller_nachname ?? ''}`.trim()) || 'Ohne Titel'}
+                  title={(record.fields.projekttitel ?? `${record.fields.antragsteller_vorname ?? ''} ${record.fields.antragsteller_nachname ?? ''}`.trim()) || tx('Ohne Titel')}
                   subtitle={record.fields.antragsstatus?.label}
                 />
                 <FoerderantraegeDetails
@@ -438,7 +439,7 @@ export default function DashboardOverview() {
             return (
               <>
                 <RecordHeader
-                  title={`${record.fields.vorname ?? ''} ${record.fields.nachname ?? ''}`.trim() || 'Sachbearbeiter'}
+                  title={`${record.fields.vorname ?? ''} ${record.fields.nachname ?? ''}`.trim() || tx('Sachbearbeiter')}
                   subtitle={record.fields.funktion ?? record.fields.abteilung}
                 />
                 <SachbearbeiterDetails
